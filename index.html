@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VariSelle — Marketplace B2B</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f0b;
+    --surface: #151810;
+    --surface2: #1c2016;
+    --accent: #8fb840;
+    --accent2: #c5e07a;
+    --text: #e8ead2;
+    --muted: #7a7d62;
+    --border: rgba(143, 184, 64, 0.18);
+    --radius: 12px;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  .page {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 420px;
+  }
+
+  .left {
+    position: relative;
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+
+  .grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(143,184,64,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(143,184,64,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    animation: pulse 6s ease-in-out infinite;
+  }
+  .orb1 { width: 400px; height: 400px; background: rgba(143,184,64,0.12); top: -100px; left: -100px; }
+  .orb2 { width: 300px; height: 300px; background: rgba(197,224,122,0.07); bottom: 100px; right: -50px; animation-delay: -3s; }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.7; }
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--accent2);
+    letter-spacing: 0.08em;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-dot {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: inline-block;
+    animation: blink 2s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .hero {
+    position: relative;
+    z-index: 1;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(143,184,64,0.1);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 12px;
+    color: var(--accent2);
+    letter-spacing: 0.05em;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .badge-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    line-height: 1.15;
+    color: var(--text);
+    margin-bottom: 1.2rem;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent2);
+  }
+
+  .hero p {
+    font-size: 1rem;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 480px;
+    margin-bottom: 2.5rem;
+    font-weight: 300;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .stats {
+    display: flex;
+    gap: 2.5rem;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: var(--accent2);
+    display: block;
+  }
+  .stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+
+  .left-footer {
+    position: relative;
+    z-index: 1;
+    font-size: 12px;
+    color: var(--muted);
+    animation: fadeUp 0.6s 0.4s ease both;
+  }
+
+  .tag-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 0.5rem;
+  }
+
+  .tag {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .right {
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem;
+    animation: slideIn 0.5s ease both;
+  }
+
+  @keyframes slideIn {
+    from { transform: translateX(30px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes fadeUp {
+    from { transform: translateY(16px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .auth-card {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .tabs {
+    display: flex;
+    background: var(--surface2);
+    border-radius: var(--radius);
+    padding: 4px;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border);
+  }
+
+  .tab {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+
+  .tab.active {
+    background: var(--accent);
+    color: #0d0f0b;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    letter-spacing: 0.04em;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus { border-color: var(--accent); }
+  input::placeholder { color: var(--muted); }
+
+  .siret-hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .siret-hint::before {
+    content: '';
+    display: inline-block;
+    width: 5px; height: 5px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 13px;
+    background: var(--accent);
+    color: #0d0f0b;
+    border: none;
+    border-radius: 9px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 0.5rem;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 1.2rem 0;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .forgot {
+    text-align: right;
+    margin-top: 5px;
+    margin-bottom: 1rem;
+  }
+
+  .forgot a, .toggle-link a {
+    font-size: 12px;
+    color: var(--accent2);
+    text-decoration: none;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+  }
+
+  .forgot a:hover, .toggle-link a:hover { opacity: 1; }
+
+  .toggle-link {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 1.2rem;
+  }
+
+  .form-panel { display: none; }
+  .form-panel.active { display: block; }
+
+  .pro-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: rgba(143,184,64,0.07);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 1.2rem;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .pro-notice-icon { color: var(--accent); font-size: 15px; margin-top: 1px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="left">
+    <div class="grid-bg"></div>
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+
+    <div class="logo">
+      <span class="logo-dot"></span>
+      VariSelle
+    </div>
+
+    <div class="hero">
+      <div class="badge">
+        <span class="badge-dot"></span>
+        Marketplace professionnelle · B2B
+      </div>
+      <h1>
+        L'équipement équestre,<br>
+        <em>sans intermédiaire.</em>
+      </h1>
+      <p>
+        La plateforme réservée aux professionnels du secteur équestre.
+        Achetez, vendez, négociez — vérification SIRET garantie pour
+        chaque acteur de la plateforme.
+      </p>
+      <div class="stats">
+        <div class="stat-item">
+          <span class="stat-num">100%</span>
+          <span class="stat-label">Vendeurs vérifiés</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num">B2B</span>
+          <span class="stat-label">Professionnels uniquement</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num">0€</span>
+          <span class="stat-label">Frais d'inscription</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="left-footer">
+      <div class="tag-row">
+        <span class="tag">Sellerie</span>
+        <span class="tag">Équipement cheval</span>
+        <span class="tag">Matériel d'écurie</span>
+        <span class="tag">Accessoires</span>
+      </div>
+      <span>© 2025 VariSelle — Réservé aux professionnels</span>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="auth-card">
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('login')">Connexion</button>
+        <button class="tab" onclick="switchTab('register')">Inscription</button>
+      </div>
+
+      <div class="form-panel active" id="panel-login">
+        <div class="form-group">
+          <label>Adresse e-mail</label>
+          <input type="email" placeholder="vous@entreprise.fr">
+        </div>
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <input type="password" placeholder="••••••••">
+        </div>
+        <div class="forgot"><a href="#">Mot de passe oublié ?</a></div>
+        <button class="btn-primary">Se connecter</button>
+        <div class="divider">ou</div>
+        <div class="toggle-link">
+          Pas encore de compte ? <a href="#" onclick="switchTab('register'); return false;">Créer un compte pro</a>
+        </div>
+      </div>
+
+      <div class="form-panel" id="panel-register">
+        <div class="pro-notice">
+          <span class="pro-notice-icon">⬡</span>
+          Accès réservé aux professionnels. Votre SIRET sera vérifié automatiquement lors de l'inscription.
+        </div>
+        <div class="form-group">
+          <label>Raison sociale</label>
+          <input type="text" placeholder="Ma Sellerie SAS">
+        </div>
+        <div class="form-group">
+          <label>Numéro SIRET</label>
+          <input type="text" placeholder="00000000000000" maxlength="14">
+          <div class="siret-hint">Vérification automatique via INSEE Sirene</div>
+        </div>
+        <div class="form-group">
+          <label>Adresse e-mail professionnelle</label>
+          <input type="email" placeholder="vous@entreprise.fr">
+        </div>
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <input type="password" placeholder="Minimum 8 caractères">
+        </div>
+        <button class="btn-primary">Créer mon compte</button>
+        <div class="toggle-link" style="margin-top: 1rem;">
+          Déjà inscrit ? <a href="#" onclick="switchTab('login'); return false;">Se connecter</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(function(t, i) {
+    t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
+  });
+  document.getElementById('panel-login').classList.toggle('active', tab === 'login');
+  document.getElementById('panel-register').classList.toggle('active', tab === 'register');
+}
+</script>
+
+</body>
+</html>
