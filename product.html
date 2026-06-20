@@ -543,23 +543,14 @@
         <div class="price-tier best"><span>10 + unités</span> <span class="price-tier-label">1 050 € / u <span>−15%</span></span></div>
       </div>
 
-      <div class="qty-row">
-        <span class="qty-label">Quantité</span>
-        <div class="qty-input">
-          <button class="qty-btn" onclick="changeQty(-1)">−</button>
-          <input type="number" id="qty" value="1" min="1">
-          <button class="qty-btn" onclick="changeQty(1)">+</button>
-        </div>
+      <div class="stock-info" style="margin-bottom:1rem;">
+        <span class="stock-dot"></span>
+        Article unique · Disponible
       </div>
 
       <div class="cta-row">
-        <button class="btn btn-primary btn-lg" style="flex:1">🛒 Ajouter au panier</button>
+        <button class="btn btn-primary btn-lg" style="flex:1">🛒 Contacter le vendeur</button>
         <button class="btn btn-outline btn-lg" style="min-width:46px;padding:14px;">🤍</button>
-      </div>
-
-      <div class="stock-info">
-        <span class="stock-dot"></span>
-        En stock · 18 unités disponibles · Expédition sous 3 j
       </div>
     </div>
 
@@ -607,7 +598,7 @@
         <div class="product-meta">Sellerie</div>
         <div class="product-name">Selle CSO jumping cuir bulle</div>
         <div class="product-price">980 € <span class="product-price-unit">HT</span></div>
-        <div class="product-seller">🏪 EquiPro <span class="seller-verified">✓</span></div>
+        <div class="product-seller">🏪 EquiPro </div>
       </div>
     </a>
 
@@ -619,7 +610,7 @@
         <div class="product-meta">Sellerie</div>
         <div class="product-name">Sous-selle feutrine naturelle 50×50 cm</div>
         <div class="product-price">45 € <span class="product-price-unit">HT</span></div>
-        <div class="product-seller">🏪 Sellerie du Sud <span class="seller-verified">✓</span></div>
+        <div class="product-seller">🏪 Sellerie du Sud </div>
       </div>
     </a>
 
@@ -631,7 +622,7 @@
         <div class="product-meta">Sellerie</div>
         <div class="product-name">Étriers légers inox réglables — paire</div>
         <div class="product-price">62 € <span class="product-price-unit">HT</span></div>
-        <div class="product-seller">🏪 HorseGear Pro <span class="seller-verified">✓</span></div>
+        <div class="product-seller">🏪 HorseGear Pro </div>
       </div>
     </a>
 
@@ -643,7 +634,7 @@
         <div class="product-meta">Entretien</div>
         <div class="product-name">Crème nourrissante cuir selle 500 ml</div>
         <div class="product-price">18 € <span class="product-price-unit">HT</span></div>
-        <div class="product-seller">🏪 EquiCare SARL <span class="seller-verified">✓</span></div>
+        <div class="product-seller">🏪 EquiCare SARL </div>
       </div>
     </a>
 
@@ -653,11 +644,6 @@
 <script>
 function toggleMobileNav() {
   document.getElementById('mobile-nav').classList.toggle('open');
-}
-function changeQty(delta) {
-  var input = document.getElementById('qty');
-  var v = parseInt(input.value) + delta;
-  if (v >= 1) input.value = v;
 }
 function switchInfo(id, btn) {
   document.querySelectorAll('.info-panel').forEach(function(p) { p.classList.remove('active'); });
