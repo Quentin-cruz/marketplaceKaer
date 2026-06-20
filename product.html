@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Selle de dressage cuir — Kaer Seller</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+/* ===== PRODUCT PAGE ===== */
+.breadcrumb {
+  padding: 14px clamp(1rem, 4vw, 3rem);
+  font-size: 13px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.breadcrumb a { color: var(--muted); text-decoration: none; }
+.breadcrumb a:hover { color: var(--brown); }
+.breadcrumb-sep { color: var(--border2); }
+.breadcrumb-current { color: var(--text2); }
+
+.product-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 4vw, 3rem);
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 3rem;
+}
+
+/* GALLERY */
+.gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gallery-main {
+  aspect-ratio: 4/3;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 5rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.gallery-main-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+}
+
+.gallery-thumbs {
+  display: flex;
+  gap: 10px;
+}
+
+.gallery-thumb {
+  flex: 1;
+  aspect-ratio: 1;
+  background: var(--surface2);
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  overflow: hidden;
+}
+.gallery-thumb.active { border-color: var(--brown); }
+.gallery-thumb:hover { border-color: var(--border2); }
+
+/* PRODUCT INFO */
+.product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.product-info-header {
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.2rem;
+}
+
+.product-category {
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.product-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.4rem, 3vw, 1.8rem);
+  color: var(--text);
+  line-height: 1.3;
+  margin-bottom: 0.8rem;
+}
+
+.product-rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.stars { color: #d4972a; letter-spacing: 1px; }
+.rating-count { color: var(--muted); }
+
+/* PRICING BOX */
+.pricing-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.2rem;
+  margin-bottom: 1.2rem;
+}
+
+.price-ht {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  color: var(--brown);
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.price-ttc {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 1rem;
+}
+
+.price-volume {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 1rem;
+  padding: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.price-tier {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: var(--text2);
+}
+.price-tier.best { color: var(--green); font-weight: 500; }
+.price-tier-label { color: var(--muted); }
+
+.qty-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1rem;
+}
+
+.qty-label { font-size: 13px; color: var(--text2); font-weight: 500; }
+
+.qty-input {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.qty-btn {
+  width: 34px; height: 38px;
+  background: var(--surface2);
+  border: none;
+  color: var(--text2);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.qty-btn:hover { background: var(--surface3); }
+
+.qty-input input {
+  width: 56px;
+  height: 38px;
+  text-align: center;
+  border: none;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  border-radius: 0;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--surface);
+  box-shadow: none;
+}
+.qty-input input:focus { border-color: var(--border); box-shadow: none; }
+
+.cta-row {
+  display: flex;
+  gap: 10px;
+}
+
+.stock-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--green);
+  margin-top: 10px;
+}
+.stock-dot { width: 7px; height: 7px; background: var(--green); border-radius: 50%; flex-shrink: 0; }
+
+/* SELLER CARD */
+.seller-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.seller-avatar {
+  width: 44px; height: 44px;
+  border-radius: var(--radius);
+  background: var(--brown-pale);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.seller-info { flex: 1; min-width: 0; }
+.seller-name { font-weight: 600; font-size: 14px; color: var(--text); margin-bottom: 2px; }
+.seller-meta { font-size: 12px; color: var(--muted); }
+.seller-siret { font-size: 11.5px; color: var(--green); margin-top: 3px; }
+
+/* TRUST BADGES */
+.trust-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 1.2rem;
+}
+
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 12px;
+  color: var(--text2);
+}
+.trust-icon { font-size: 16px; flex-shrink: 0; }
+
+/* TABS NAV */
+.info-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 1.5rem;
+}
+
+.info-tab {
+  padding: 9px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.info-tab.active { color: var(--brown); border-bottom-color: var(--brown); }
+.info-tab:hover:not(.active) { color: var(--text2); }
+
+.info-panel { display: none; }
+.info-panel.active { display: block; }
+
+/* DESCRIPTION */
+.description {
+  font-size: 14.5px;
+  line-height: 1.8;
+  color: var(--text2);
+}
+.description p { margin-bottom: 1rem; }
+
+.specs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+.specs-table tr { border-bottom: 1px solid var(--border); }
+.specs-table tr:last-child { border-bottom: none; }
+.specs-table td { padding: 9px 12px; }
+.specs-table td:first-child { color: var(--muted); font-weight: 500; width: 40%; }
+.specs-table td:last-child { color: var(--text); }
+.specs-table tr:nth-child(even) td { background: var(--surface2); }
+
+/* REVIEWS */
+.review-summary {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.review-big-score { font-family: var(--font-serif); font-size: 3rem; color: var(--brown); line-height: 1; }
+.review-stars { color: #d4972a; font-size: 1.1rem; margin-bottom: 3px; }
+.review-count { font-size: 12px; color: var(--muted); }
+
+.review-bars { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+.review-bar-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.review-bar-track { flex: 1; height: 6px; background: var(--surface3); border-radius: 3px; overflow: hidden; }
+.review-bar-fill { height: 100%; background: #d4972a; border-radius: 3px; }
+
+.review-item { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+.review-item:last-child { border-bottom: none; }
+.review-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.reviewer-name { font-weight: 600; font-size: 13.5px; color: var(--text); }
+.review-date { font-size: 12px; color: var(--muted); margin-left: auto; }
+.review-text { font-size: 13.5px; color: var(--text2); line-height: 1.6; }
+
+/* SIMILAR PRODUCTS */
+.similar-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 3rem) clamp(2rem, 4vw, 3rem);
+}
+.similar-title {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--border);
+}
+.similar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 960px) {
+  .product-page { grid-template-columns: 1fr; gap: 2rem; }
+  .product-info-header { margin-top: 0; }
+}
+
+@media (max-width: 640px) {
+  .gallery-thumbs { display: none; }
+  .trust-row { grid-template-columns: 1fr; }
+  .cta-row { flex-direction: column; }
+  .cta-row .btn { width: 100%; }
+  .review-summary { flex-direction: column; gap: 1rem; align-items: flex-start; }
+  .similar-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a class="navbar-logo" href="index.html">
+    <span class="navbar-logo-icon">⬡</span>
+    Kaer Seller
+  </a>
+
+  <div class="navbar-nav">
+    <a class="nav-link" href="marketplace.html">Catalogue</a>
+    <a class="nav-link" href="#">Mes achats</a>
+    <a class="nav-link" href="#">Mes annonces</a>
+    <a class="nav-link" href="#">Messages</a>
+  </div>
+
+  <div class="navbar-actions">
+    <div class="navbar-search">
+      <span class="navbar-search-icon">🔍</span>
+      <input type="search" placeholder="Rechercher un produit…">
+    </div>
+    <a href="#" class="btn btn-ghost btn-sm">+ Publier</a>
+    <div class="avatar" title="Mon compte">QC</div>
+  </div>
+
+  <button class="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-nav" id="mobile-nav">
+  <a class="nav-link" href="marketplace.html">Catalogue</a>
+  <a class="nav-link" href="#">Mes achats</a>
+  <a class="nav-link" href="#">Mes annonces</a>
+  <a class="nav-link" href="#">Messages</a>
+</div>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <a href="marketplace.html">Catalogue</a>
+  <span class="breadcrumb-sep">›</span>
+  <a href="#">Sellerie</a>
+  <span class="breadcrumb-sep">›</span>
+  <a href="#">Selles</a>
+  <span class="breadcrumb-sep">›</span>
+  <span class="breadcrumb-current">Selle de dressage cuir pleine fleur</span>
+</div>
+
+<!-- PRODUCT PAGE -->
+<div class="product-page">
+
+  <!-- GALLERY -->
+  <div class="gallery">
+    <div class="gallery-main">
+      🏇
+      <div class="gallery-main-badge">
+        <span class="badge badge-green">Neuf · En stock</span>
+      </div>
+    </div>
+    <div class="gallery-thumbs">
+      <div class="gallery-thumb active">🏇</div>
+      <div class="gallery-thumb" style="background:var(--green-pale);">🧵</div>
+      <div class="gallery-thumb" style="background:var(--brown-pale);">📐</div>
+      <div class="gallery-thumb" style="background:var(--surface3);">🔖</div>
+    </div>
+
+    <!-- TABS DESCRIPTION (on desktop, below gallery) -->
+    <div style="margin-top:2rem;">
+      <div class="info-tabs">
+        <button class="info-tab active" onclick="switchInfo('desc', this)">Description</button>
+        <button class="info-tab" onclick="switchInfo('specs', this)">Caractéristiques</button>
+        <button class="info-tab" onclick="switchInfo('reviews', this)">Avis (14)</button>
+      </div>
+
+      <div class="info-panel active" id="info-desc">
+        <div class="description">
+          <p>La selle de dressage <strong>Équilibre Pro</strong> est fabriquée à partir de cuir pleine fleur tanné végétal, sélectionné pour sa durabilité et son confort. Conçue pour les professionnels exigeants, elle offre un assiette profonde et une sécurité maximale lors des reprises de haute école.</p>
+          <p>Les quartiers sont cousus main avec du fil de lin ciré. La selle est livrée avec sa housse de transport et son certificat d'authenticité.</p>
+          <p>Disponible en finition naturelle (havane) ou teintée (noir, brun foncé). Personnalisation possible sur devis pour les commandes de plus de 5 unités.</p>
+        </div>
+      </div>
+
+      <div class="info-panel" id="info-specs">
+        <table class="specs-table">
+          <tr><td>Matière principale</td><td>Cuir pleine fleur tanné végétal</td></tr>
+          <tr><td>Taille de siège</td><td>16.5″, 17″, 17.5″, 18″</td></tr>
+          <tr><td>Largeur de garrot</td><td>Moyen (MW), Large (W), Très large (XW)</td></tr>
+          <tr><td>Couleur</td><td>Havane, Noir, Brun foncé</td></tr>
+          <tr><td>Poids</td><td>5,8 kg</td></tr>
+          <tr><td>Conforme CE</td><td>Oui — EN 15621:2011</td></tr>
+          <tr><td>Délai de livraison</td><td>5–10 jours ouvrés</td></tr>
+          <tr><td>Garantie</td><td>24 mois pièces et main d'œuvre</td></tr>
+          <tr><td>Référence</td><td>EQP-DRS-001-HV</td></tr>
+        </table>
+      </div>
+
+      <div class="info-panel" id="info-reviews">
+        <div class="review-summary">
+          <div>
+            <div class="review-big-score">4,7</div>
+            <div class="review-stars">★★★★★</div>
+            <div class="review-count">14 avis vérifiés</div>
+          </div>
+          <div class="review-bars">
+            <div class="review-bar-row">5 ★ <div class="review-bar-track"><div class="review-bar-fill" style="width:72%"></div></div> 10</div>
+            <div class="review-bar-row">4 ★ <div class="review-bar-track"><div class="review-bar-fill" style="width:21%"></div></div> 3</div>
+            <div class="review-bar-row">3 ★ <div class="review-bar-track"><div class="review-bar-fill" style="width:7%"></div></div> 1</div>
+            <div class="review-bar-row">2 ★ <div class="review-bar-track"><div class="review-bar-fill" style="width:0%"></div></div> 0</div>
+            <div class="review-bar-row">1 ★ <div class="review-bar-track"><div class="review-bar-fill" style="width:0%"></div></div> 0</div>
+          </div>
+        </div>
+
+        <div class="review-item">
+          <div class="review-header">
+            <div class="stars">★★★★★</div>
+            <span class="reviewer-name">Centre Équestre du Marais</span>
+            <span class="review-date">14 mars 2026</span>
+          </div>
+          <p class="review-text">Qualité irréprochable. Nous avons commandé 3 selles pour notre école, parfaites pour l'enseignement. Le cuir est souple dès la réception, vraiment excellent rapport qualité/prix.</p>
+        </div>
+
+        <div class="review-item">
+          <div class="review-header">
+            <div class="stars">★★★★☆</div>
+            <span class="reviewer-name">Haras de Gascogne</span>
+            <span class="review-date">2 février 2026</span>
+          </div>
+          <p class="review-text">Bonne selle, conforme à la description. Délai de livraison légèrement plus long que prévu (12 jours), mais le produit vaut le détour.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCT INFO -->
+  <div class="product-info">
+
+    <div class="product-info-header">
+      <div class="product-category">Sellerie · Selles de dressage</div>
+      <h1 class="product-title">Selle de dressage cuir pleine fleur — Modèle Équilibre Pro</h1>
+      <div class="product-rating">
+        <span class="stars">★★★★★</span>
+        <span>4,7</span>
+        <span class="rating-count">(14 avis)</span>
+        <span class="product-meta-dot" style="width:3px;height:3px;background:var(--border2);border-radius:50%;"></span>
+        <span>42 ventes</span>
+      </div>
+    </div>
+
+    <!-- PRICING -->
+    <div class="pricing-box">
+      <div class="price-ht">1 240 €</div>
+      <div class="price-ttc">soit 1 488 € TTC · Prix HT affiché</div>
+
+      <div class="price-volume">
+        <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Tarifs dégressifs</div>
+        <div class="price-tier"><span>1 – 4 unités</span> <span class="price-tier-label">1 240 € / u</span></div>
+        <div class="price-tier"><span>5 – 9 unités</span> <span class="price-tier-label">1 150 € / u <span style="color:var(--green)">−7%</span></span></div>
+        <div class="price-tier best"><span>10 + unités</span> <span class="price-tier-label">1 050 € / u <span>−15%</span></span></div>
+      </div>
+
+      <div class="qty-row">
+        <span class="qty-label">Quantité</span>
+        <div class="qty-input">
+          <button class="qty-btn" onclick="changeQty(-1)">−</button>
+          <input type="number" id="qty" value="1" min="1">
+          <button class="qty-btn" onclick="changeQty(1)">+</button>
+        </div>
+      </div>
+
+      <div class="cta-row">
+        <button class="btn btn-primary btn-lg" style="flex:1">🛒 Ajouter au panier</button>
+        <button class="btn btn-outline btn-lg" style="min-width:46px;padding:14px;">🤍</button>
+      </div>
+
+      <div class="stock-info">
+        <span class="stock-dot"></span>
+        En stock · 18 unités disponibles · Expédition sous 3 j
+      </div>
+    </div>
+
+    <!-- SELLER -->
+    <div class="seller-card">
+      <div class="seller-avatar">🏪</div>
+      <div class="seller-info">
+        <div class="seller-name">Sellerie Dupont & Fils</div>
+        <div class="seller-meta">⭐ 4,9 · 127 ventes · Depuis 2019</div>
+        <div class="seller-siret">✓ SIRET 52314789600024 vérifié INSEE</div>
+      </div>
+      <a href="#" class="btn btn-ghost btn-sm">Contacter</a>
+    </div>
+
+    <!-- TRUST BADGES -->
+    <div class="trust-row">
+      <div class="trust-item"><span class="trust-icon">🛡️</span> Paiement sécurisé</div>
+      <div class="trust-item"><span class="trust-icon">↩️</span> Retour 14 jours</div>
+      <div class="trust-item"><span class="trust-icon">🚚</span> Livraison pro</div>
+      <div class="trust-item"><span class="trust-icon">📋</span> Facture HT/TTC</div>
+    </div>
+
+    <!-- ASK QUESTION -->
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.2rem;">
+      <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">❓ Une question sur ce produit ?</div>
+      <div style="display:flex;gap:8px;">
+        <input type="text" placeholder="Ex : Disponible en taille 18 pouces noir ?" style="font-size:13px;">
+        <button class="btn btn-ghost btn-sm" style="flex-shrink:0;">Envoyer</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SIMILAR PRODUCTS -->
+<div class="similar-section">
+  <div class="similar-title">Produits similaires</div>
+  <div class="similar-grid">
+
+    <a class="product-card" href="product.html">
+      <div class="product-img" style="font-size:2rem;"><span>🏇</span>
+        <div class="product-badge-wrap"><span class="badge badge-green">Neuf</span></div>
+      </div>
+      <div class="product-body">
+        <div class="product-meta">Sellerie</div>
+        <div class="product-name">Selle CSO jumping cuir bulle</div>
+        <div class="product-price">980 € <span class="product-price-unit">HT</span></div>
+        <div class="product-seller">🏪 EquiPro <span class="seller-verified">✓</span></div>
+      </div>
+    </a>
+
+    <a class="product-card" href="product.html">
+      <div class="product-img" style="background:var(--brown-pale);font-size:2rem;"><span>🧵</span>
+        <div class="product-badge-wrap"><span class="badge badge-green">Neuf</span></div>
+      </div>
+      <div class="product-body">
+        <div class="product-meta">Sellerie</div>
+        <div class="product-name">Sous-selle feutrine naturelle 50×50 cm</div>
+        <div class="product-price">45 € <span class="product-price-unit">HT</span></div>
+        <div class="product-seller">🏪 Sellerie du Sud <span class="seller-verified">✓</span></div>
+      </div>
+    </a>
+
+    <a class="product-card" href="product.html">
+      <div class="product-img" style="background:var(--green-pale);font-size:2rem;"><span>🔗</span>
+        <div class="product-badge-wrap"><span class="badge badge-gray">Occasion</span></div>
+      </div>
+      <div class="product-body">
+        <div class="product-meta">Sellerie</div>
+        <div class="product-name">Étriers légers inox réglables — paire</div>
+        <div class="product-price">62 € <span class="product-price-unit">HT</span></div>
+        <div class="product-seller">🏪 HorseGear Pro <span class="seller-verified">✓</span></div>
+      </div>
+    </a>
+
+    <a class="product-card" href="product.html">
+      <div class="product-img" style="background:#f5f0ea;font-size:2rem;"><span>🧴</span>
+        <div class="product-badge-wrap"><span class="badge badge-green">Neuf</span></div>
+      </div>
+      <div class="product-body">
+        <div class="product-meta">Entretien</div>
+        <div class="product-name">Crème nourrissante cuir selle 500 ml</div>
+        <div class="product-price">18 € <span class="product-price-unit">HT</span></div>
+        <div class="product-seller">🏪 EquiCare SARL <span class="seller-verified">✓</span></div>
+      </div>
+    </a>
+
+  </div>
+</div>
+
+<script>
+function toggleMobileNav() {
+  document.getElementById('mobile-nav').classList.toggle('open');
+}
+function changeQty(delta) {
+  var input = document.getElementById('qty');
+  var v = parseInt(input.value) + delta;
+  if (v >= 1) input.value = v;
+}
+function switchInfo(id, btn) {
+  document.querySelectorAll('.info-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.info-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.getElementById('info-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+document.querySelectorAll('.gallery-thumb').forEach(function(t) {
+  t.addEventListener('click', function() {
+    document.querySelectorAll('.gallery-thumb').forEach(function(x) { x.classList.remove('active'); });
+    t.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

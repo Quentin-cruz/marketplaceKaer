@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marketplace — Kaer Seller</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+/* ===== MARKETPLACE PAGE ===== */
+
+/* HERO BANNER */
+.market-hero {
+  background: var(--green);
+  padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 4vw, 3rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.market-hero-text h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  color: #fff;
+  margin-bottom: 0.3rem;
+}
+.market-hero-text p {
+  font-size: 14px;
+  color: rgba(255,255,255,.65);
+}
+
+.market-hero-search {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex: 1;
+  max-width: 500px;
+}
+
+.search-wrap {
+  position: relative;
+  flex: 1;
+}
+.search-wrap input {
+  padding: 11px 16px 11px 42px;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: var(--radius);
+  color: #fff;
+  font-size: 14px;
+}
+.search-wrap input::placeholder { color: rgba(255,255,255,.5); }
+.search-wrap input:focus { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.4); box-shadow: none; }
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255,255,255,.5);
+  font-size: 15px;
+}
+
+/* LAYOUT */
+.market-body {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 0;
+  min-height: calc(100vh - 64px - 80px);
+}
+
+/* SIDEBAR */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 1.5rem;
+  position: sticky;
+  top: 64px;
+  height: calc(100vh - 64px);
+  overflow-y: auto;
+}
+
+.sidebar-section {
+  margin-bottom: 1.8rem;
+}
+
+.sidebar-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.filter-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+  font-size: 13.5px;
+  color: var(--text2);
+}
+.filter-item:hover { background: var(--surface2); }
+.filter-item.active { background: var(--brown-pale); color: var(--brown); font-weight: 500; }
+
+.filter-count {
+  font-size: 11px;
+  background: var(--surface3);
+  color: var(--muted);
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  min-width: 22px;
+  text-align: center;
+}
+.filter-item.active .filter-count {
+  background: rgba(124,79,42,.12);
+  color: var(--brown);
+}
+
+/* price range */
+.price-range {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 4px;
+}
+.price-range input {
+  padding: 7px 10px;
+  font-size: 13px;
+}
+.price-range span { color: var(--muted); font-size: 12px; flex-shrink: 0; }
+
+/* MAIN CONTENT */
+.market-main {
+  padding: clamp(1rem, 3vw, 1.5rem) clamp(1rem, 3vw, 2rem);
+}
+
+.market-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.results-count {
+  font-size: 14px;
+  color: var(--muted);
+}
+.results-count strong { color: var(--text); }
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sort-select {
+  padding: 8px 12px;
+  font-size: 13px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  cursor: pointer;
+  width: auto;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 2px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+.view-btn {
+  width: 30px; height: 30px;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.15s;
+}
+.view-btn.active { background: var(--surface); color: var(--brown); box-shadow: var(--shadow-sm); }
+
+/* ACTIVE FILTERS */
+.active-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 1.2rem;
+}
+
+.filter-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--brown-pale);
+  color: var(--brown);
+  border: 1px solid rgba(124,79,42,.2);
+  border-radius: var(--radius-full);
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.filter-tag:hover { background: rgba(124,79,42,.15); }
+.filter-tag-x { font-size: 14px; line-height: 1; margin-left: 2px; }
+
+/* PRODUCT GRID */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.2rem;
+}
+
+.product-grid.list-view {
+  grid-template-columns: 1fr;
+}
+
+/* PRODUCT CARD */
+.product-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s;
+  text-decoration: none;
+  display: block;
+  color: inherit;
+}
+.product-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+
+.product-img {
+  aspect-ratio: 4/3;
+  background: var(--surface2);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+}
+
+.product-img-placeholder {
+  opacity: .3;
+}
+
+.product-badge-wrap {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.product-fav {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px; height: 32px;
+  background: rgba(255,255,255,.9);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.product-fav:hover { background: #fff; box-shadow: var(--shadow-sm); }
+
+.product-body {
+  padding: 14px;
+}
+
+.product-meta {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.product-meta-dot { width: 3px; height: 3px; background: var(--border2); border-radius: 50%; }
+
+.product-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.product-price {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  color: var(--brown);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.product-price-unit {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-weight: 400;
+}
+
+.product-seller {
+  font-size: 11.5px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.seller-verified {
+  color: var(--green);
+  font-size: 11px;
+}
+
+/* LIST VIEW CARD */
+.product-grid.list-view .product-card {
+  display: grid;
+  grid-template-columns: 160px 1fr auto;
+  align-items: center;
+  gap: 0;
+}
+.product-grid.list-view .product-img {
+  aspect-ratio: auto;
+  height: 100%;
+  min-height: 120px;
+  border-radius: 0;
+}
+.product-grid.list-view .product-body {
+  padding: 16px;
+}
+.product-grid.list-view .product-actions {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+.product-grid.list-view .product-fav { position: static; background: var(--surface2); }
+
+/* PAGINATION */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 2.5rem;
+  padding-bottom: 2rem;
+  flex-wrap: wrap;
+}
+.page-btn {
+  min-width: 36px; height: 36px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+}
+.page-btn:hover { border-color: var(--brown); color: var(--brown); }
+.page-btn.active { background: var(--brown); border-color: var(--brown); color: #fff; }
+
+/* MOBILE FILTERS TOGGLE */
+.mobile-filter-btn {
+  display: none;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .market-body { grid-template-columns: 200px 1fr; }
+  .product-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+}
+
+@media (max-width: 768px) {
+  .market-hero { flex-direction: column; align-items: flex-start; }
+  .market-hero-search { width: 100%; max-width: none; }
+  .market-body { grid-template-columns: 1fr; }
+  .sidebar {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    height: 100%;
+    z-index: 200;
+    border-right: none;
+    border-radius: 0;
+    padding-top: 4rem;
+    overflow-y: auto;
+  }
+  .sidebar.open { display: block; }
+  .sidebar-close {
+    display: flex !important;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+  }
+  .mobile-filter-btn { display: flex; }
+  .product-grid.list-view .product-card { grid-template-columns: 120px 1fr; }
+  .product-grid.list-view .product-actions { display: none; }
+}
+
+@media (max-width: 480px) {
+  .product-grid:not(.list-view) { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
+  .market-toolbar { flex-direction: column; align-items: flex-start; }
+  .toolbar-right { width: 100%; justify-content: space-between; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a class="navbar-logo" href="index.html">
+    <span class="navbar-logo-icon">⬡</span>
+    Kaer Seller
+  </a>
+
+  <div class="navbar-nav">
+    <a class="nav-link active" href="marketplace.html">Catalogue</a>
+    <a class="nav-link" href="#">Mes achats</a>
+    <a class="nav-link" href="#">Mes annonces</a>
+    <a class="nav-link" href="#">Messages</a>
+  </div>
+
+  <div class="navbar-actions">
+    <div class="navbar-search">
+      <span class="navbar-search-icon">🔍</span>
+      <input type="search" placeholder="Rechercher un produit…">
+    </div>
+    <a href="#" class="btn btn-ghost btn-sm">+ Publier</a>
+    <div class="avatar" title="Mon compte">QC</div>
+  </div>
+
+  <button class="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-nav" id="mobile-nav">
+  <a class="nav-link active" href="marketplace.html">Catalogue</a>
+  <a class="nav-link" href="#">Mes achats</a>
+  <a class="nav-link" href="#">Mes annonces</a>
+  <a class="nav-link" href="#">Messages</a>
+  <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border);">
+    <a href="#" class="btn btn-primary btn-full">+ Publier une annonce</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="market-hero">
+  <div class="market-hero-text">
+    <h1>Catalogue professionnel</h1>
+    <p>2 847 produits · Vendeurs vérifiés SIRET</p>
+  </div>
+  <div class="market-hero-search">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="search" placeholder="Selle, filet, tapis, licol…">
+    </div>
+    <button class="btn btn-primary" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;flex-shrink:0;">Rechercher</button>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="market-body">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <button class="btn btn-ghost btn-sm sidebar-close" style="display:none" onclick="closeSidebar()">✕ Fermer</button>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Catégories</div>
+      <div class="filter-item active" onclick="setFilter(this)">
+        Tout le catalogue
+        <span class="filter-count">2 847</span>
+      </div>
+      <div class="filter-item" onclick="setFilter(this)">
+        Sellerie
+        <span class="filter-count">482</span>
+      </div>
+      <div class="filter-item" onclick="setFilter(this)">
+        Équipement cheval
+        <span class="filter-count">634</span>
+      </div>
+      <div class="filter-item" onclick="setFilter(this)">
+        Matériel d'écurie
+        <span class="filter-count">391</span>
+      </div>
+      <div class="filter-item" onclick="setFilter(this)">
+        Vêtements équitation
+        <span class="filter-count">298</span>
+      </div>
+      <div class="filter-item" onclick="setFilter(this)">
+        Soins & santé
+        <span class="filter-count">215</span>
+      </div>
+      <div class="filter-item" onclick="setFilter(this)">
+        Alimentation
+        <span class="filter-count">187</span>
+      </div>
+      <div class="filter-item" onclick="setFilter(this)">
+        Accessoires
+        <span class="filter-count">640</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Prix (€ HT)</div>
+      <div class="price-range">
+        <input type="number" placeholder="Min" min="0" value="">
+        <span>–</span>
+        <input type="number" placeholder="Max" min="0" value="">
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">État</div>
+      <div class="filter-item" onclick="toggleFilter(this)">Neuf</div>
+      <div class="filter-item" onclick="toggleFilter(this)">Reconditionné</div>
+      <div class="filter-item" onclick="toggleFilter(this)">Occasion</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Disponibilité</div>
+      <div class="filter-item" onclick="toggleFilter(this)">En stock</div>
+      <div class="filter-item" onclick="toggleFilter(this)">Commande possible</div>
+      <div class="filter-item" onclick="toggleFilter(this)">Sur devis</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Localisation</div>
+      <div class="filter-item" onclick="toggleFilter(this)">Île-de-France</div>
+      <div class="filter-item" onclick="toggleFilter(this)">Occitanie</div>
+      <div class="filter-item" onclick="toggleFilter(this)">Normandie</div>
+      <div class="filter-item" onclick="toggleFilter(this)">Nouvelle-Aquitaine</div>
+      <div class="filter-item" onclick="toggleFilter(this)">Autre région</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="market-main">
+    <div class="market-toolbar">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-sm mobile-filter-btn" onclick="openSidebar()">
+          ☰ Filtres
+        </button>
+        <span class="results-count"><strong>2 847</strong> produits</span>
+      </div>
+
+      <div class="active-filters">
+        <span class="filter-tag">Sellerie <span class="filter-tag-x">×</span></span>
+        <span class="filter-tag">Neuf <span class="filter-tag-x">×</span></span>
+      </div>
+
+      <div class="toolbar-right">
+        <select class="sort-select">
+          <option>Plus récents</option>
+          <option>Prix croissant</option>
+          <option>Prix décroissant</option>
+          <option>Meilleures notes</option>
+        </select>
+        <div class="view-toggle">
+          <button class="view-btn active" id="grid-btn" onclick="setView('grid')" title="Grille">⊞</button>
+          <button class="view-btn" id="list-btn" onclick="setView('list')" title="Liste">≡</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRID -->
+    <div class="product-grid" id="product-grid">
+
+      <!-- CARD 1 -->
+      <a class="product-card" href="product.html">
+        <div class="product-img">
+          <span class="product-img-placeholder">🏇</span>
+          <div class="product-badge-wrap">
+            <span class="badge badge-green">Neuf</span>
+          </div>
+          <div class="product-fav">🤍</div>
+        </div>
+        <div class="product-body">
+          <div class="product-meta">Sellerie <span class="product-meta-dot"></span> Selles</div>
+          <div class="product-name">Selle de dressage cuir pleine fleur — Modèle Équilibre</div>
+          <div class="product-price">1 240 € <span class="product-price-unit">HT / unité</span></div>
+          <div class="product-seller">🏪 Sellerie Dupont <span class="seller-verified">✓ Vérifié</span></div>
+        </div>
+      </a>
+
+      <!-- CARD 2 -->
+      <a class="product-card" href="product.html">
+        <div class="product-img">
+          <span class="product-img-placeholder">🧲</span>
+          <div class="product-badge-wrap">
+            <span class="badge badge-green">Neuf</span>
+            <span class="badge badge-brown">Pro</span>
+          </div>
+          <div class="product-fav">🤍</div>
+        </div>
+        <div class="product-body">
+          <div class="product-meta">Équipement <span class="product-meta-dot"></span> Filets</div>
+          <div class="product-name">Filet de bride mixte cuir nubuck — Lot de 5</div>
+          <div class="product-price">89 € <span class="product-price-unit">HT / unité</span></div>
+          <div class="product-seller">🏪 HorseGear Pro <span class="seller-verified">✓ Vérifié</span></div>
+        </div>
+      </a>
+
+      <!-- CARD 3 -->
+      <a class="product-card" href="product.html">
+        <div class="product-img" style="background:var(--green-pale);">
+          <span class="product-img-placeholder">🧴</span>
+          <div class="product-badge-wrap">
+            <span class="badge badge-gray">Occasion</span>
+          </div>
+          <div class="product-fav">🤍</div>
+        </div>
+        <div class="product-body">
+          <div class="product-meta">Soins <span class="product-meta-dot"></span> Entretien cuir</div>
+          <div class="product-name">Baume protecteur cuir longue durée 5L — Professionnel</div>
+          <div class="product-price">34 € <span class="product-price-unit">HT / unité</span></div>
+          <div class="product-seller">🏪 EquiCare SARL <span class="seller-verified">✓ Vérifié</span></div>
+        </div>
+      </a>
+
+      <!-- CARD 4 -->
+      <a class="product-card" href="product.html">
+        <div class="product-img" style="background:#f0ede8;">
+          <span class="product-img-placeholder">🪣</span>
+          <div class="product-badge-wrap">
+            <span class="badge badge-green">Neuf</span>
+          </div>
+          <div class="product-fav">🤍</div>
+        </div>
+        <div class="product-body">
+          <div class="product-meta">Écurie <span class="product-meta-dot"></span> Matériel</div>
+          <div class="product-name">Kit pansage complet premium — Brosse, peigne, cure-pied</div>
+          <div class="product-price">22 € <span class="product-price-unit">HT / kit</span></div>
+          <div class="product-seller">🏪 L'Atelier Équin <span class="seller-verified">✓ Vérifié</span></div>
+        </div>
+      </a>
+
+      <!-- CARD 5 -->
+      <a class="product-card" href="product.html">
+        <div class="product-img" style="background:#ede8f0;">
+          <span class="product-img-placeholder">🎽</span>
+          <div class="product-badge-wrap">
+            <span class="badge badge-green">Neuf</span>
+            <span class="badge badge-brown">Lot</span>
+          </div>
+          <div class="product-fav">🤍</div>
+        </div>
+        <div class="product-body">
+          <div class="product-meta">Vêtements <span class="product-meta-dot"></span> Cavalier</div>
+          <div class="product-name">Bombe équitation homologuée CE — Tailles S à XL</div>
+          <div class="product-price">58 € <span class="product-price-unit">HT / unité</span></div>
+          <div class="product-seller">🏪 RideWear France <span class="seller-verified">✓ Vérifié</span></div>
+        </div>
+      </a>
+
+      <!-- CARD 6 -->
+      <a class="product-card" href="product.html">
+        <div class="product-img" style="background:#f0ede8;">
+          <span class="product-img-placeholder">🌾</span>
+          <div class="product-badge-wrap">
+            <span class="badge badge-green">Stock</span>
+          </div>
+          <div class="product-fav">🤍</div>
+        </div>
+        <div class="product-body">
+          <div class="product-meta">Alimentation <span class="product-meta-dot"></span> Fourrage</div>
+          <div class="product-name">Foin de prairie 1ère coupe — Botte 15 kg (palette × 40)</div>
+          <div class="product-price">7,50 € <span class="product-price-unit">HT / botte</span></div>
+          <div class="product-seller">🏪 Agri Green SAS <span class="seller-verified">✓ Vérifié</span></div>
+        </div>
+      </a>
+
+      <!-- CARD 7 -->
+      <a class="product-card" href="product.html">
+        <div class="product-img" style="background:#e8f0ee;">
+          <span class="product-img-placeholder">🧰</span>
+          <div class="product-badge-wrap">
+            <span class="badge badge-green">Neuf</span>
+          </div>
+          <div class="product-fav">🤍</div>
+        </div>
+        <div class="product-body">
+          <div class="product-meta">Écurie <span class="product-meta-dot"></span> Infrastructure</div>
+          <div class="product-name">Porte de box à barreaux galvanisé — 1,2 m × 2,1 m</div>
+          <div class="product-price">420 € <span class="product-price-unit">HT / unité</span></div>
+          <div class="product-seller">🏪 ÉcurieDesign Pro <span class="seller-verified">✓ Vérifié</span></div>
+        </div>
+      </a>
+
+      <!-- CARD 8 -->
+      <a class="product-card" href="product.html">
+        <div class="product-img" style="background:var(--brown-pale);">
+          <span class="product-img-placeholder">🎀</span>
+          <div class="product-badge-wrap">
+            <span class="badge badge-gray">Sur devis</span>
+          </div>
+          <div class="product-fav">🤍</div>
+        </div>
+        <div class="product-body">
+          <div class="product-meta">Accessoires <span class="product-meta-dot"></span> Licols</div>
+          <div class="product-name">Licol cuir gravé personnalisé — Fabrication artisanale</div>
+          <div class="product-price">Sur devis</div>
+          <div class="product-seller">🏪 Maroquinerie Équestre Blois <span class="seller-verified">✓ Vérifié</span></div>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination">
+      <button class="page-btn">‹</button>
+      <button class="page-btn active">1</button>
+      <button class="page-btn">2</button>
+      <button class="page-btn">3</button>
+      <button class="page-btn">…</button>
+      <button class="page-btn">24</button>
+      <button class="page-btn">›</button>
+    </div>
+
+  </main>
+</div>
+
+<script>
+function toggleMobileNav() {
+  document.getElementById('mobile-nav').classList.toggle('open');
+}
+function setFilter(el) {
+  el.parentElement.querySelectorAll('.filter-item').forEach(function(i) { i.classList.remove('active'); });
+  el.classList.add('active');
+}
+function toggleFilter(el) { el.classList.toggle('active'); }
+function setView(v) {
+  var grid = document.getElementById('product-grid');
+  grid.classList.toggle('list-view', v === 'list');
+  document.getElementById('grid-btn').classList.toggle('active', v === 'grid');
+  document.getElementById('list-btn').classList.toggle('active', v === 'list');
+}
+function openSidebar() { document.getElementById('sidebar').classList.add('open'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); }
+</script>
+</body>
+</html>

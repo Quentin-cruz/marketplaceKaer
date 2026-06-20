@@ -3,469 +3,428 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VariSelle — Marketplace B2B</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<title>Kaer Seller — Marketplace B2B Équestre</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ===== LOGIN PAGE SPECIFIC ===== */
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 460px;
+}
 
-  :root {
-    --bg: #0d0f0b;
-    --surface: #151810;
-    --surface2: #1c2016;
-    --accent: #8fb840;
-    --accent2: #c5e07a;
-    --text: #e8ead2;
-    --muted: #7a7d62;
-    --border: rgba(143, 184, 64, 0.18);
-    --radius: 12px;
-  }
+/* LEFT PANEL */
+.login-left {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(2rem, 5vw, 3.5rem);
+  background: var(--green);
+  overflow: hidden;
+}
 
-  html, body {
-    height: 100%;
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    overflow-x: hidden;
-  }
+.login-left-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(255,255,255,.06) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(0,0,0,.15) 0%, transparent 50%);
+}
 
-  .page {
-    min-height: 100vh;
-    display: grid;
-    grid-template-columns: 1fr 420px;
-  }
+.login-left-texture {
+  position: absolute;
+  inset: 0;
+  opacity: .04;
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20L0 0M40 0L0 40M40 40L20 20' stroke='%23fff' stroke-width='.5' fill='none'/%3E%3C/svg%3E");
+  background-size: 40px 40px;
+}
 
-  .left {
-    position: relative;
-    padding: 3rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    overflow: hidden;
-  }
+.login-logo {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
 
-  .grid-bg {
-    position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(143,184,64,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(143,184,64,0.04) 1px, transparent 1px);
-    background-size: 60px 60px;
-    pointer-events: none;
-  }
+.login-logo-icon {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
 
-  .orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    pointer-events: none;
-    animation: pulse 6s ease-in-out infinite;
-  }
-  .orb1 { width: 400px; height: 400px; background: rgba(143,184,64,0.12); top: -100px; left: -100px; }
-  .orb2 { width: 300px; height: 300px; background: rgba(197,224,122,0.07); bottom: 100px; right: -50px; animation-delay: -3s; }
+.login-hero {
+  position: relative;
+  z-index: 1;
+  color: #fff;
+}
 
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.05); opacity: 0.7; }
-  }
+.login-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: var(--radius-full);
+  padding: 5px 12px;
+  font-size: 12px;
+  color: rgba(255,255,255,.85);
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.04em;
+}
 
-  .logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.4rem;
-    color: var(--accent2);
-    letter-spacing: 0.08em;
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
+.login-badge-dot {
+  width: 6px; height: 6px;
+  background: #a8d770;
+  border-radius: 50%;
+}
 
-  .logo-dot {
-    width: 8px; height: 8px;
-    background: var(--accent);
-    border-radius: 50%;
-    display: inline-block;
-    animation: blink 2s ease-in-out infinite;
-  }
+.login-hero h1 {
+  font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+  color: #fff;
+  line-height: 1.15;
+  margin-bottom: 1.2rem;
+  font-weight: 700;
+}
 
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
+.login-hero h1 em {
+  font-style: italic;
+  color: #c8e898;
+}
 
-  .hero {
-    position: relative;
-    z-index: 1;
-  }
+.login-hero p {
+  font-size: 1rem;
+  color: rgba(255,255,255,.7);
+  line-height: 1.7;
+  max-width: 440px;
+  font-weight: 300;
+  margin-bottom: 2.5rem;
+}
 
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(143,184,64,0.1);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    padding: 6px 14px;
-    font-size: 12px;
-    color: var(--accent2);
-    letter-spacing: 0.05em;
-    margin-bottom: 2rem;
-    animation: fadeUp 0.6s ease both;
-  }
+.stats-row {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
 
-  .badge-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+.stat {
+  border-left: 2px solid rgba(255,255,255,.2);
+  padding-left: 1rem;
+}
 
-  .hero h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2.4rem, 4vw, 3.6rem);
-    line-height: 1.15;
-    color: var(--text);
-    margin-bottom: 1.2rem;
-    animation: fadeUp 0.6s 0.1s ease both;
-  }
+.stat-num {
+  font-family: var(--font-serif);
+  font-size: 1.6rem;
+  color: #c8e898;
+  display: block;
+  line-height: 1;
+  margin-bottom: 3px;
+}
 
-  .hero h1 em {
-    font-style: italic;
-    color: var(--accent2);
-  }
+.stat-label {
+  font-size: 11px;
+  color: rgba(255,255,255,.55);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
 
-  .hero p {
-    font-size: 1rem;
-    color: var(--muted);
-    line-height: 1.7;
-    max-width: 480px;
-    margin-bottom: 2.5rem;
-    font-weight: 300;
-    animation: fadeUp 0.6s 0.2s ease both;
-  }
+.login-footer {
+  position: relative;
+  z-index: 1;
+  color: rgba(255,255,255,.45);
+  font-size: 12px;
+}
 
-  .stats {
-    display: flex;
-    gap: 2.5rem;
-    animation: fadeUp 0.6s 0.3s ease both;
-  }
+.tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
 
-  .stat-num {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.8rem;
-    color: var(--accent2);
-    display: block;
-  }
-  .stat-label {
-    font-size: 12px;
-    color: var(--muted);
-    letter-spacing: 0.04em;
-  }
+.tag-pill {
+  padding: 4px 10px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  color: rgba(255,255,255,.55);
+}
 
-  .left-footer {
-    position: relative;
-    z-index: 1;
-    font-size: 12px;
-    color: var(--muted);
-    animation: fadeUp 0.6s 0.4s ease both;
-  }
+/* RIGHT PANEL */
+.login-right {
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  border-left: 1px solid var(--border);
+}
 
-  .tag-row {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 0.5rem;
-  }
+.auth-card {
+  width: 100%;
+  max-width: 380px;
+}
 
-  .tag {
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 4px 10px;
-    font-size: 11px;
-    color: var(--muted);
-  }
+.auth-title {
+  font-family: var(--font-serif);
+  font-size: 1.7rem;
+  color: var(--text);
+  margin-bottom: 0.4rem;
+}
 
-  .right {
-    background: var(--surface);
-    border-left: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2.5rem;
-    animation: slideIn 0.5s ease both;
-  }
+.auth-subtitle {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
 
-  @keyframes slideIn {
-    from { transform: translateX(30px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-  }
+/* TABS */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 1.8rem;
+}
 
-  @keyframes fadeUp {
-    from { transform: translateY(16px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
+.tab {
+  flex: 1;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
 
-  .auth-card {
-    width: 100%;
-    max-width: 360px;
-  }
+.tab.active {
+  color: var(--brown);
+  border-bottom-color: var(--brown);
+}
+.tab:hover:not(.active) { color: var(--text2); }
 
-  .tabs {
-    display: flex;
-    background: var(--surface2);
-    border-radius: var(--radius);
-    padding: 4px;
-    margin-bottom: 2rem;
-    border: 1px solid var(--border);
-  }
+.form-panel { display: none; }
+.form-panel.active { display: block; }
 
-  .tab {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    background: transparent;
-    color: var(--muted);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    border-radius: 9px;
-    cursor: pointer;
-    transition: all 0.25s;
-  }
+/* NOTICE BOX */
+.notice {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: var(--green-pale);
+  border: 1px solid rgba(61,92,56,.18);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  margin-bottom: 1.2rem;
+  font-size: 12.5px;
+  color: var(--green);
+  line-height: 1.5;
+}
+.notice-icon { flex-shrink: 0; font-size: 15px; margin-top: 1px; }
 
-  .tab.active {
-    background: var(--accent);
-    color: #0d0f0b;
-  }
+.hint {
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.hint::before {
+  content: '';
+  display: inline-block;
+  width: 4px; height: 4px;
+  background: var(--brown-light);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
 
-  .form-group {
-    margin-bottom: 1rem;
-  }
+.forgot {
+  text-align: right;
+  margin-top: 5px;
+  margin-bottom: 0.8rem;
+}
+.forgot a, .auth-link {
+  font-size: 12.5px;
+  color: var(--brown);
+  text-decoration: none;
+  opacity: .8;
+  transition: opacity 0.15s;
+}
+.forgot a:hover, .auth-link:hover { opacity: 1; text-decoration: underline; }
 
-  label {
-    display: block;
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 6px;
-    letter-spacing: 0.04em;
-  }
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 1rem 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
 
-  input[type="text"],
-  input[type="email"],
-  input[type="password"] {
-    width: 100%;
-    padding: 12px 14px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
+.auth-toggle {
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 1.2rem;
+}
 
-  input:focus { border-color: var(--accent); }
-  input::placeholder { color: var(--muted); }
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .login-page { grid-template-columns: 1fr; }
+  .login-left { padding: 2rem; min-height: 280px; }
+  .login-left .stats-row { gap: 1.5rem; }
+  .login-hero h1 { font-size: clamp(1.8rem, 6vw, 2.4rem); }
+  .login-footer { display: none; }
+  .login-right { padding: 2rem 1.5rem; border-left: none; border-top: 1px solid var(--border); }
+}
 
-  .siret-hint {
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 5px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-
-  .siret-hint::before {
-    content: '';
-    display: inline-block;
-    width: 5px; height: 5px;
-    background: var(--accent);
-    border-radius: 50%;
-  }
-
-  .btn-primary {
-    width: 100%;
-    padding: 13px;
-    background: var(--accent);
-    color: #0d0f0b;
-    border: none;
-    border-radius: 9px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-top: 0.5rem;
-    letter-spacing: 0.02em;
-  }
-
-  .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
-  .btn-primary:active { transform: translateY(0); }
-
-  .divider {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 1.2rem 0;
-    font-size: 12px;
-    color: var(--muted);
-  }
-
-  .divider::before, .divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  .forgot {
-    text-align: right;
-    margin-top: 5px;
-    margin-bottom: 1rem;
-  }
-
-  .forgot a, .toggle-link a {
-    font-size: 12px;
-    color: var(--accent2);
-    text-decoration: none;
-    opacity: 0.8;
-    transition: opacity 0.2s;
-  }
-
-  .forgot a:hover, .toggle-link a:hover { opacity: 1; }
-
-  .toggle-link {
-    text-align: center;
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 1.2rem;
-  }
-
-  .form-panel { display: none; }
-  .form-panel.active { display: block; }
-
-  .pro-notice {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    background: rgba(143,184,64,0.07);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 12px;
-    margin-bottom: 1.2rem;
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.5;
-  }
-
-  .pro-notice-icon { color: var(--accent); font-size: 15px; margin-top: 1px; flex-shrink: 0; }
+@media (max-width: 480px) {
+  .login-left { min-height: 240px; }
+  .login-hero p { display: none; }
+  .stats-row .stat:last-child { display: none; }
+  .login-right { padding: 1.5rem 1rem; }
+}
 </style>
 </head>
 <body>
 
-<div class="page">
-  <div class="left">
-    <div class="grid-bg"></div>
-    <div class="orb orb1"></div>
-    <div class="orb orb2"></div>
+<div class="login-page">
 
-    <div class="logo">
-      <span class="logo-dot"></span>
-      VariSelle
-    </div>
+  <!-- LEFT -->
+  <div class="login-left">
+    <div class="login-left-bg"></div>
+    <div class="login-left-texture"></div>
 
-    <div class="hero">
-      <div class="badge">
-        <span class="badge-dot"></span>
+    <a class="login-logo" href="#">
+      <span class="login-logo-icon">⬡</span>
+      Kaer Seller
+    </a>
+
+    <div class="login-hero">
+      <div class="login-badge">
+        <span class="login-badge-dot"></span>
         Marketplace professionnelle · B2B
       </div>
       <h1>
         L'équipement équestre,<br>
-        <em>sans intermédiaire !</em>
+        <em>sans intermédiaire.</em>
       </h1>
       <p>
         La plateforme réservée aux professionnels du secteur équestre.
-        Achetez, vendez, négociez — vérification SIRET garantie pour
-        chaque acteur de la plateforme.
+        Achetez, vendez, négociez — chaque acteur est vérifié par SIRET.
       </p>
-      <div class="stats">
-        <div class="stat-item">
+      <div class="stats-row">
+        <div class="stat">
           <span class="stat-num">100%</span>
           <span class="stat-label">Vendeurs vérifiés</span>
         </div>
-        <div class="stat-item">
+        <div class="stat">
           <span class="stat-num">B2B</span>
-          <span class="stat-label">Professionnels uniquement</span>
+          <span class="stat-label">Pros uniquement</span>
         </div>
-        <div class="stat-item">
-          <span class="stat-num">0€</span>
-          <span class="stat-label">Frais d'inscription</span>
+        <div class="stat">
+          <span class="stat-num">0 €</span>
+          <span class="stat-label">Inscription gratuite</span>
         </div>
       </div>
     </div>
 
-    <div class="left-footer">
-      <div class="tag-row">
-        <span class="tag">Sellerie</span>
-        <span class="tag">Équipement cheval</span>
-        <span class="tag">Matériel d'écurie</span>
-        <span class="tag">Accessoires</span>
+    <div class="login-footer">
+      <div class="tags-row">
+        <span class="tag-pill">Sellerie</span>
+        <span class="tag-pill">Équipement cheval</span>
+        <span class="tag-pill">Matériel d'écurie</span>
+        <span class="tag-pill">Accessoires</span>
+        <span class="tag-pill">Vêtements équitation</span>
       </div>
-      <span>© 2026 VariSelle — Réservé aux professionnels</span>
+      <span>© 2026 Kaer Seller — Réservé aux professionnels</span>
     </div>
   </div>
 
-  <div class="right">
+  <!-- RIGHT -->
+  <div class="login-right">
     <div class="auth-card">
       <div class="tabs">
         <button class="tab active" onclick="switchTab('login')">Connexion</button>
         <button class="tab" onclick="switchTab('register')">Inscription</button>
       </div>
 
+      <!-- LOGIN -->
       <div class="form-panel active" id="panel-login">
+        <p class="auth-subtitle">Bon retour sur Kaer Seller !</p>
         <div class="form-group">
           <label>Adresse e-mail</label>
-          <input type="email" placeholder="vous@entreprise.fr">
+          <input type="email" placeholder="vous@entreprise.fr" autocomplete="email">
         </div>
         <div class="form-group">
           <label>Mot de passe</label>
-          <input type="password" placeholder="••••••••">
+          <input type="password" placeholder="••••••••" autocomplete="current-password">
+          <div class="forgot"><a href="#">Mot de passe oublié ?</a></div>
         </div>
-        <div class="forgot"><a href="#">Mot de passe oublié ?</a></div>
-        <button class="btn-primary">Se connecter</button>
+        <button class="btn btn-primary btn-full btn-lg">Se connecter</button>
         <div class="divider">ou</div>
-        <div class="toggle-link">
-          Pas encore de compte ? <a href="#" onclick="switchTab('register'); return false;">Créer un compte</a>
+        <div class="auth-toggle">
+          Pas encore de compte ?
+          <a class="auth-link" href="#" onclick="switchTab('register'); return false;">Créer un compte</a>
         </div>
       </div>
 
+      <!-- REGISTER -->
       <div class="form-panel" id="panel-register">
-        <div class="pro-notice">
-          <span class="pro-notice-icon">⬡</span>
-          Accès réservé aux professionnels. Votre SIRET sera vérifié automatiquement lors de l'inscription.
+        <div class="notice">
+          <span class="notice-icon">🛡️</span>
+          Accès réservé aux professionnels. Votre SIRET sera vérifié automatiquement via l'INSEE Sirene.
         </div>
         <div class="form-group">
           <label>Raison sociale</label>
-          <input type="text" placeholder="Ma Sellerie SAS">
+          <input type="text" placeholder="Ma Sellerie SAS" autocomplete="organization">
         </div>
         <div class="form-group">
           <label>Numéro de SIRET</label>
-          <input type="text" placeholder="00000000000000" maxlength="14">
-          <div class="siret-hint">Vérification automatique via INSEE Sirene</div>
+          <input type="text" placeholder="00000000000000" maxlength="14" inputmode="numeric">
+          <div class="hint">14 chiffres · Vérification automatique INSEE Sirene</div>
         </div>
         <div class="form-group">
-          <label>Adresse e-mail professionnelle</label>
-          <input type="email" placeholder="vous@entreprise.fr">
+          <label>E-mail professionnel</label>
+          <input type="email" placeholder="vous@entreprise.fr" autocomplete="email">
         </div>
         <div class="form-group">
           <label>Mot de passe</label>
-          <input type="password" placeholder="Minimum 8 caractères">
+          <input type="password" placeholder="Minimum 8 caractères" autocomplete="new-password">
         </div>
-        <button class="btn-primary">Créer mon compte</button>
-        <div class="toggle-link" style="margin-top: 1rem;">
-          Déjà inscrit ? <a href="#" onclick="switchTab('login'); return false;">Se connecter</a>
+        <button class="btn btn-primary btn-full btn-lg">Créer mon compte</button>
+        <div class="auth-toggle" style="margin-top:1rem">
+          Déjà inscrit ?
+          <a class="auth-link" href="#" onclick="switchTab('login'); return false;">Se connecter</a>
         </div>
       </div>
 
     </div>
   </div>
+
 </div>
 
 <script>
@@ -477,6 +436,5 @@ function switchTab(tab) {
   document.getElementById('panel-register').classList.toggle('active', tab === 'register');
 }
 </script>
-
 </body>
 </html>
