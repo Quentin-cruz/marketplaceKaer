@@ -454,18 +454,30 @@
 
   <div class="navbar-nav">
     <a class="nav-link active" href="marketplace.html">Catalogue</a>
-    <a class="nav-link" href="#">Mes achats</a>
-    <a class="nav-link" href="#">Mes annonces</a>
-    <a class="nav-link" href="#">Messages</a>
+    <a class="nav-link" href="mes-achats.html">Mes achats</a>
+    <a class="nav-link" href="mes-annonces.html">Mes annonces</a>
+    <span class="nav-link-wrap"><a class="nav-link" href="messages.html">Messages</a><span class="nav-badge" id="msg-badge"></span></span>
   </div>
 
   <div class="navbar-actions">
     <div class="navbar-search">
-      <span class="navbar-search-icon">🔍</span>
+      <svg class="navbar-search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8.5" cy="8.5" r="5.5"/><line x1="13" y1="13" x2="18" y2="18"/></svg>
       <input type="search" placeholder="Rechercher un produit…">
     </div>
-    <a href="#" class="btn btn-ghost btn-sm">+ Publier</a>
-    <div class="avatar" title="Mon compte">QC</div>
+    <a href="publier.html" class="btn btn-ghost btn-sm">+ Publier</a>
+    <div class="avatar-wrap">
+      <div class="avatar" id="nav-avatar" onclick="toggleDropdown()" style="cursor:pointer"></div>
+      <div class="avatar-dropdown" id="avatar-dropdown">
+        <div class="avatar-dropdown-header">
+          <span class="avatar-dropdown-name" id="dd-name"></span>
+          <span class="avatar-dropdown-email" id="dd-email"></span>
+        </div>
+        <a class="avatar-dropdown-item" href="#">👤 Mon profil</a>
+        <a class="avatar-dropdown-item" href="mes-annonces.html">📋 Mes annonces</a>
+        <div class="avatar-dropdown-sep"></div>
+        <button class="avatar-dropdown-item danger" onclick="logout()">↩ Se déconnecter</button>
+      </div>
+    </div>
   </div>
 
   <button class="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
@@ -492,9 +504,9 @@
   <div class="market-hero-search">
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
-      <input type="search" placeholder="Selle, filet, tapis, licol…">
+      <input type="search" id="search-input" placeholder="Selle, filet, tapis, licol…" onkeydown="if(event.key==='Enter') loadProduits()">
     </div>
-    <button class="btn btn-primary" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;flex-shrink:0;">Rechercher</button>
+    <button class="btn btn-primary" onclick="loadProduits()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;flex-shrink:0;">Rechercher</button>
   </div>
 </div>
 
@@ -507,61 +519,28 @@
 
     <div class="sidebar-section">
       <div class="sidebar-title">Catégories</div>
-      <div class="filter-item active" onclick="setFilter(this)">
-        Tout le catalogue
-        <span class="filter-count">2 847</span>
-      </div>
-      <div class="filter-item" onclick="setFilter(this)">
-        Sellerie
-        <span class="filter-count">482</span>
-      </div>
-      <div class="filter-item" onclick="setFilter(this)">
-        Équipement cheval
-        <span class="filter-count">634</span>
-      </div>
-      <div class="filter-item" onclick="setFilter(this)">
-        Matériel d'écurie
-        <span class="filter-count">391</span>
-      </div>
-      <div class="filter-item" onclick="setFilter(this)">
-        Vêtements équitation
-        <span class="filter-count">298</span>
-      </div>
-      <div class="filter-item" onclick="setFilter(this)">
-        Soins & santé
-        <span class="filter-count">215</span>
-      </div>
-      <div class="filter-item" onclick="setFilter(this)">
-        Alimentation
-        <span class="filter-count">187</span>
-      </div>
-      <div class="filter-item" onclick="setFilter(this)">
-        Accessoires
-        <span class="filter-count">640</span>
-      </div>
-    </div>
-
-    <div class="sidebar-section">
-      <div class="sidebar-title">Prix (€ HT)</div>
-      <div class="price-range">
-        <input type="number" placeholder="Min" min="0" value="">
-        <span>–</span>
-        <input type="number" placeholder="Max" min="0" value="">
-      </div>
+      <div class="filter-item active" onclick="setCategorie(this, null)">Tout le catalogue</div>
+      <div class="filter-item" onclick="setCategorie(this, 'Sellerie')">Sellerie</div>
+      <div class="filter-item" onclick="setCategorie(this, 'Équipement cheval')">Équipement cheval</div>
+      <div class="filter-item" onclick="setCategorie(this, 'Matériel d\'écurie')">Matériel d'écurie</div>
+      <div class="filter-item" onclick="setCategorie(this, 'Vêtements équitation')">Vêtements équitation</div>
+      <div class="filter-item" onclick="setCategorie(this, 'Soins & santé')">Soins & santé</div>
+      <div class="filter-item" onclick="setCategorie(this, 'Alimentation')">Alimentation</div>
+      <div class="filter-item" onclick="setCategorie(this, 'Accessoires')">Accessoires</div>
     </div>
 
     <div class="sidebar-section">
       <div class="sidebar-title">État</div>
-      <div class="filter-item" onclick="toggleFilter(this)">Neuf</div>
-      <div class="filter-item" onclick="toggleFilter(this)">Reconditionné</div>
-      <div class="filter-item" onclick="toggleFilter(this)">Occasion</div>
+      <div class="filter-item" onclick="toggleEtat(this, 'neuf')">Neuf</div>
+      <div class="filter-item" onclick="toggleEtat(this, 'reconditionne')">Reconditionné</div>
+      <div class="filter-item" onclick="toggleEtat(this, 'occasion')">Occasion</div>
     </div>
 
     <div class="sidebar-section">
       <div class="sidebar-title">Localisation</div>
-      <div class="filter-item" onclick="toggleFilter(this)">Bretagne</div>
-      <div class="filter-item" onclick="toggleFilter(this)">Normandie</div>
-      <div class="filter-item" onclick="toggleFilter(this)">Pays de la Loire</div>
+      <div class="filter-item" onclick="toggleRegion(this, 'Bretagne')">Bretagne</div>
+      <div class="filter-item" onclick="toggleRegion(this, 'Normandie')">Normandie</div>
+      <div class="filter-item" onclick="toggleRegion(this, 'Pays de la Loire')">Pays de la Loire</div>
     </div>
   </aside>
 
@@ -572,20 +551,16 @@
         <button class="btn btn-ghost btn-sm mobile-filter-btn" onclick="openSidebar()">
           ☰ Filtres
         </button>
-        <span class="results-count"><strong>2 847</strong> produits</span>
+        <span class="results-count" id="results-count"></span>
       </div>
 
-      <div class="active-filters">
-        <span class="filter-tag">Sellerie <span class="filter-tag-x">×</span></span>
-        <span class="filter-tag">Neuf <span class="filter-tag-x">×</span></span>
-      </div>
+      <div class="active-filters" id="active-filters"></div>
 
       <div class="toolbar-right">
-        <select class="sort-select">
-          <option>Plus récents</option>
-          <option>Prix croissant</option>
-          <option>Prix décroissant</option>
-          <option>Meilleures notes</option>
+        <select class="sort-select" onchange="setSort(this.value)">
+          <option value="recent">Plus récents</option>
+          <option value="prix_asc">Prix croissant</option>
+          <option value="prix_desc">Prix décroissant</option>
         </select>
         <div class="view-toggle">
           <button class="view-btn active" id="grid-btn" onclick="setView('grid')" title="Grille">⊞</button>
@@ -596,178 +571,141 @@
 
     <!-- GRID -->
     <div class="product-grid" id="product-grid">
-
-      <!-- CARD 1 -->
-      <a class="product-card" href="product.html">
-        <div class="product-img">
-          <span class="product-img-placeholder">🏇</span>
-          <div class="product-badge-wrap">
-            <span class="badge badge-green">Neuf</span>
-          </div>
-          <div class="product-fav">🤍</div>
-        </div>
-        <div class="product-body">
-          <div class="product-meta">Sellerie <span class="product-meta-dot"></span> Selles</div>
-          <div class="product-name">Selle de dressage cuir pleine fleur — Modèle Équilibre</div>
-          <div class="product-price">1 240 € <span class="product-price-unit">HT / unité</span></div>
-          <div class="product-seller">🏪 Sellerie Dupont </div>
-        </div>
-      </a>
-
-      <!-- CARD 2 -->
-      <a class="product-card" href="product.html">
-        <div class="product-img">
-          <span class="product-img-placeholder">🧲</span>
-          <div class="product-badge-wrap">
-            <span class="badge badge-green">Neuf</span>
-            <span class="badge badge-brown">Pro</span>
-          </div>
-          <div class="product-fav">🤍</div>
-        </div>
-        <div class="product-body">
-          <div class="product-meta">Équipement <span class="product-meta-dot"></span> Filets</div>
-          <div class="product-name">Filet de bride mixte cuir nubuck — Lot de 5</div>
-          <div class="product-price">89 € <span class="product-price-unit">HT / unité</span></div>
-          <div class="product-seller">🏪 HorseGear Pro </div>
-        </div>
-      </a>
-
-      <!-- CARD 3 -->
-      <a class="product-card" href="product.html">
-        <div class="product-img" style="background:var(--green-pale);">
-          <span class="product-img-placeholder">🧴</span>
-          <div class="product-badge-wrap">
-            <span class="badge badge-gray">Occasion</span>
-          </div>
-          <div class="product-fav">🤍</div>
-        </div>
-        <div class="product-body">
-          <div class="product-meta">Soins <span class="product-meta-dot"></span> Entretien cuir</div>
-          <div class="product-name">Baume protecteur cuir longue durée 5L — Professionnel</div>
-          <div class="product-price">34 € <span class="product-price-unit">HT / unité</span></div>
-          <div class="product-seller">🏪 EquiCare SARL </div>
-        </div>
-      </a>
-
-      <!-- CARD 4 -->
-      <a class="product-card" href="product.html">
-        <div class="product-img" style="background:#f0ede8;">
-          <span class="product-img-placeholder">🪣</span>
-          <div class="product-badge-wrap">
-            <span class="badge badge-green">Neuf</span>
-          </div>
-          <div class="product-fav">🤍</div>
-        </div>
-        <div class="product-body">
-          <div class="product-meta">Écurie <span class="product-meta-dot"></span> Matériel</div>
-          <div class="product-name">Kit pansage complet premium — Brosse, peigne, cure-pied</div>
-          <div class="product-price">22 € <span class="product-price-unit">HT / kit</span></div>
-          <div class="product-seller">🏪 L'Atelier Équin </div>
-        </div>
-      </a>
-
-      <!-- CARD 5 -->
-      <a class="product-card" href="product.html">
-        <div class="product-img" style="background:#ede8f0;">
-          <span class="product-img-placeholder">🎽</span>
-          <div class="product-badge-wrap">
-            <span class="badge badge-green">Neuf</span>
-            <span class="badge badge-brown">Lot</span>
-          </div>
-          <div class="product-fav">🤍</div>
-        </div>
-        <div class="product-body">
-          <div class="product-meta">Vêtements <span class="product-meta-dot"></span> Cavalier</div>
-          <div class="product-name">Bombe équitation homologuée CE — Tailles S à XL</div>
-          <div class="product-price">58 € <span class="product-price-unit">HT / unité</span></div>
-          <div class="product-seller">🏪 RideWear France </div>
-        </div>
-      </a>
-
-      <!-- CARD 6 -->
-      <a class="product-card" href="product.html">
-        <div class="product-img" style="background:#f0ede8;">
-          <span class="product-img-placeholder">🌾</span>
-          <div class="product-badge-wrap">
-            <span class="badge badge-green">Stock</span>
-          </div>
-          <div class="product-fav">🤍</div>
-        </div>
-        <div class="product-body">
-          <div class="product-meta">Alimentation <span class="product-meta-dot"></span> Fourrage</div>
-          <div class="product-name">Foin de prairie 1ère coupe — Botte 15 kg (palette × 40)</div>
-          <div class="product-price">7,50 € <span class="product-price-unit">HT / botte</span></div>
-          <div class="product-seller">🏪 Agri Green SAS </div>
-        </div>
-      </a>
-
-      <!-- CARD 7 -->
-      <a class="product-card" href="product.html">
-        <div class="product-img" style="background:#e8f0ee;">
-          <span class="product-img-placeholder">🧰</span>
-          <div class="product-badge-wrap">
-            <span class="badge badge-green">Neuf</span>
-          </div>
-          <div class="product-fav">🤍</div>
-        </div>
-        <div class="product-body">
-          <div class="product-meta">Écurie <span class="product-meta-dot"></span> Infrastructure</div>
-          <div class="product-name">Porte de box à barreaux galvanisé — 1,2 m × 2,1 m</div>
-          <div class="product-price">420 € <span class="product-price-unit">HT / unité</span></div>
-          <div class="product-seller">🏪 ÉcurieDesign Pro </div>
-        </div>
-      </a>
-
-      <!-- CARD 8 -->
-      <a class="product-card" href="product.html">
-        <div class="product-img" style="background:var(--brown-pale);">
-          <span class="product-img-placeholder">🎀</span>
-          <div class="product-badge-wrap">
-            <span class="badge badge-gray">Sur devis</span>
-          </div>
-          <div class="product-fav">🤍</div>
-        </div>
-        <div class="product-body">
-          <div class="product-meta">Accessoires <span class="product-meta-dot"></span> Licols</div>
-          <div class="product-name">Licol cuir gravé personnalisé — Fabrication artisanale</div>
-          <div class="product-price">Sur devis</div>
-          <div class="product-seller">🏪 Maroquinerie Équestre Blois </div>
-        </div>
-      </a>
-
+      <div id="grid-loading" style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted);font-size:14px;">
+        Chargement des annonces…
+      </div>
     </div>
 
-    <!-- PAGINATION -->
-    <div class="pagination">
-      <button class="page-btn">‹</button>
-      <button class="page-btn active">1</button>
-      <button class="page-btn">2</button>
-      <button class="page-btn">3</button>
-      <button class="page-btn">…</button>
-      <button class="page-btn">24</button>
-      <button class="page-btn">›</button>
+    <div id="grid-empty" style="display:none;text-align:center;padding:4rem 2rem;color:var(--muted);">
+      <div style="font-size:2.5rem;margin-bottom:1rem;">📭</div>
+      <div style="font-size:16px;font-weight:500;color:var(--text2);margin-bottom:0.5rem;">Aucune annonce pour l'instant</div>
+      <div style="font-size:13px;">Soyez le premier à publier une annonce !</div>
     </div>
 
   </main>
 </div>
 
+<script src="auth-guard.js"></script>
 <script>
+(async function() {
+  const user = await requireAuth();
+  await initNav(user);
+  await loadProduits();
+})();
+
+// ===== FILTRES ACTIFS =====
+var activeFilters = { categorie: null, etat: null, region: null, sort: 'recent' };
+
 function toggleMobileNav() {
   document.getElementById('mobile-nav').classList.toggle('open');
 }
-function setFilter(el) {
+
+function setCategorie(el, value) {
   el.parentElement.querySelectorAll('.filter-item').forEach(function(i) { i.classList.remove('active'); });
   el.classList.add('active');
+  activeFilters.categorie = value;
+  loadProduits();
 }
-function toggleFilter(el) { el.classList.toggle('active'); }
+
+function toggleEtat(el, value) {
+  var isActive = el.classList.toggle('active');
+  activeFilters.etat = isActive ? value : null;
+  loadProduits();
+}
+
+function toggleRegion(el, value) {
+  el.parentElement.querySelectorAll('.filter-item').forEach(function(i) { i.classList.remove('active'); });
+  var isActive = !el.dataset.selected;
+  el.dataset.selected = isActive ? '1' : '';
+  el.classList.toggle('active', isActive);
+  activeFilters.region = isActive ? value : null;
+  loadProduits();
+}
+
+function setSort(val) {
+  activeFilters.sort = val;
+  loadProduits();
+}
+
 function setView(v) {
   var grid = document.getElementById('product-grid');
   grid.classList.toggle('list-view', v === 'list');
   document.getElementById('grid-btn').classList.toggle('active', v === 'grid');
   document.getElementById('list-btn').classList.toggle('active', v === 'list');
 }
-function openSidebar() { document.getElementById('sidebar').classList.add('open'); }
+
+function openSidebar()  { document.getElementById('sidebar').classList.add('open'); }
 function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); }
+
+// ===== BADGE ÉTAT =====
+function badgeEtat(etat) {
+  if (etat === 'neuf')          return '<span class="badge badge-green">Neuf</span>';
+  if (etat === 'occasion')      return '<span class="badge badge-gray">Occasion</span>';
+  if (etat === 'reconditionne') return '<span class="badge badge-brown">Reconditionné</span>';
+  return '';
+}
+
+// ===== RENDU D'UNE CARD =====
+function renderCard(p) {
+  var prix = p.prix_ht
+    ? parseFloat(p.prix_ht).toLocaleString('fr-FR') + ' € <span class="product-price-unit">HT</span>'
+    : 'Sur devis';
+
+  var imgs   = p.images ? JSON.parse(p.images) : [];
+  var imgHtml = imgs.length
+    ? '<img src="/uploads/' + imgs[0] + '" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">'
+    : '<span class="product-img-placeholder">🏇</span>';
+
+  return '<a class="product-card" href="product.html?id=' + p.id + '">'
+    + '<div class="product-img">'
+    + imgHtml
+    + '<div class="product-badge-wrap">' + badgeEtat(p.etat) + '</div>'
+    + '<div class="product-fav">🤍</div>'
+    + '</div>'
+    + '<div class="product-body">'
+    + '<div class="product-meta">' + p.categorie + '</div>'
+    + '<div class="product-name">' + p.titre + '</div>'
+    + '<div class="product-price">' + prix + '</div>'
+    + '<div class="product-seller">🏪 ' + p.raison_sociale + '</div>'
+    + '</div>'
+    + '</a>';
+}
+
+// ===== CHARGEMENT =====
+async function loadProduits() {
+  var grid    = document.getElementById('product-grid');
+  var empty   = document.getElementById('grid-empty');
+  var counter = document.getElementById('results-count');
+
+  grid.innerHTML = '<div id="grid-loading" style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted);font-size:14px;">Chargement…</div>';
+  empty.style.display = 'none';
+
+  var params = new URLSearchParams();
+  if (activeFilters.categorie) params.set('categorie', activeFilters.categorie);
+  if (activeFilters.etat)      params.set('etat',      activeFilters.etat);
+  if (activeFilters.region)    params.set('region',    activeFilters.region);
+  params.set('sort', activeFilters.sort);
+
+  var searchVal = document.getElementById('search-input');
+  if (searchVal && searchVal.value.trim()) params.set('q', searchVal.value.trim());
+
+  try {
+    var res  = await fetch(API + '/produits?' + params.toString(), { credentials: 'include' });
+    var data = await res.json();
+
+    if (counter) counter.innerHTML = '<strong>' + data.length + '</strong> annonce' + (data.length > 1 ? 's' : '');
+
+    if (data.length === 0) {
+      grid.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+
+    grid.innerHTML = data.map(renderCard).join('');
+  } catch (err) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:#b91c1c;font-size:14px;">Erreur de chargement.</div>';
+  }
+}
 </script>
 </body>
 </html>

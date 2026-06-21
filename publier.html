@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Publier une annonce — Kaer Seller</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.publish-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 4vw, 2rem);
+}
+
+.publish-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.publish-header h1 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  margin-bottom: 0.4rem;
+}
+
+.publish-header p {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.form-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1.2rem;
+}
+
+.form-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.6;
+}
+
+.radio-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.radio-option {
+  flex: 1;
+  min-width: 100px;
+}
+
+.radio-option input[type="radio"] {
+  display: none;
+}
+
+.radio-option label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.radio-option input[type="radio"]:checked + label {
+  background: var(--brown-pale);
+  border-color: var(--brown);
+  color: var(--brown);
+}
+
+.radio-option label:hover {
+  border-color: var(--border2);
+}
+
+.form-hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 5px;
+}
+
+.publish-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-top: 1rem;
+}
+
+/* UPLOAD PHOTOS */
+.upload-zone {
+  border: 2px dashed var(--border2);
+  border-radius: var(--radius);
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  background: var(--surface2);
+  position: relative;
+}
+.upload-zone:hover, .upload-zone.dragover {
+  border-color: var(--brown);
+  background: var(--brown-pale);
+}
+.upload-zone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+.upload-zone-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+.upload-zone-label { font-size: 14px; color: var(--text2); font-weight: 500; }
+.upload-zone-hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+.upload-previews {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  margin-top: 1rem;
+}
+.upload-preview-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.upload-preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.upload-preview-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0,0,0,.6);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 14px;
+  line-height: 22px;
+  text-align: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+@media (max-width: 600px) {
+  .form-row { grid-template-columns: 1fr; }
+  .publish-footer { flex-direction: column-reverse; }
+  .publish-footer .btn { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a class="navbar-logo" href="marketplace.html">
+    <span class="navbar-logo-icon">⬡</span>
+    Kaer Seller
+  </a>
+
+  <div class="navbar-nav">
+    <a class="nav-link" href="marketplace.html">Catalogue</a>
+    <a class="nav-link" href="mes-achats.html">Mes achats</a>
+    <a class="nav-link active" href="mes-annonces.html">Mes annonces</a>
+    <span class="nav-link-wrap"><a class="nav-link" href="messages.html">Messages</a><span class="nav-badge" id="msg-badge"></span></span>
+  </div>
+
+  <div class="navbar-actions">
+    <div class="navbar-search">
+      <svg class="navbar-search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8.5" cy="8.5" r="5.5"/><line x1="13" y1="13" x2="18" y2="18"/></svg>
+      <input type="search" placeholder="Rechercher un produit…">
+    </div>
+    <div class="avatar-wrap">
+      <div class="avatar" id="nav-avatar" onclick="toggleDropdown()" style="cursor:pointer"></div>
+      <div class="avatar-dropdown" id="avatar-dropdown">
+        <div class="avatar-dropdown-header">
+          <span class="avatar-dropdown-name" id="dd-name"></span>
+          <span class="avatar-dropdown-email" id="dd-email"></span>
+        </div>
+        <a class="avatar-dropdown-item" href="#">👤 Mon profil</a>
+        <a class="avatar-dropdown-item" href="#">📋 Mes annonces</a>
+        <div class="avatar-dropdown-sep"></div>
+        <button class="avatar-dropdown-item danger" onclick="logout()">↩ Se déconnecter</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-nav" id="mobile-nav">
+  <a class="nav-link" href="marketplace.html">Catalogue</a>
+  <a class="nav-link" href="#">Mes achats</a>
+  <a class="nav-link active" href="mes-annonces.html">Mes annonces</a>
+  <a class="nav-link" href="#">Messages</a>
+</div>
+
+<!-- CONTENU -->
+<div class="publish-page">
+
+  <div class="publish-header">
+    <h1>Publier une annonce</h1>
+    <p>Votre annonce sera visible par tous les professionnels inscrits sur Kaer Seller.</p>
+  </div>
+
+  <div id="publish-error" class="form-error" style="display:none;margin-bottom:1.2rem;"></div>
+
+  <!-- INFOS PRODUIT -->
+  <div class="form-section">
+    <div class="form-section-title">Informations du produit</div>
+
+    <div class="form-group">
+      <label>Titre de l'annonce</label>
+      <input type="text" id="f-titre" placeholder="Ex : Selle de dressage cuir pleine fleur — Modèle 2024">
+      <div class="form-hint">Soyez précis : marque, matière, modèle</div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Catégorie</label>
+        <select id="f-categorie">
+          <option value="">Choisir…</option>
+          <option value="Sellerie">Sellerie</option>
+          <option value="Équipement cheval">Équipement cheval</option>
+          <option value="Matériel d'écurie">Matériel d'écurie</option>
+          <option value="Vêtements équitation">Vêtements équitation</option>
+          <option value="Soins & santé">Soins & santé</option>
+          <option value="Alimentation">Alimentation</option>
+          <option value="Accessoires">Accessoires</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Localisation</label>
+        <select id="f-region">
+          <option value="">Choisir…</option>
+          <option value="Bretagne">Bretagne</option>
+          <option value="Normandie">Normandie</option>
+          <option value="Pays de la Loire">Pays de la Loire</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="f-description" placeholder="Décrivez votre produit : état détaillé, dimensions, historique d'utilisation, conditions de vente…"></textarea>
+    </div>
+  </div>
+
+  <!-- PHOTOS -->
+  <div class="form-section">
+    <div class="form-section-title">Photos <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optionnel — max 5)</span></div>
+    <div class="upload-zone" id="upload-zone">
+      <input type="file" id="f-images" accept="image/jpeg,image/png,image/webp" multiple>
+      <div class="upload-zone-icon">📷</div>
+      <div class="upload-zone-label">Cliquer ou glisser-déposer des photos</div>
+      <div class="upload-zone-hint">JPG, PNG ou WEBP · 5 Mo max par photo</div>
+    </div>
+    <div class="upload-previews" id="upload-previews"></div>
+  </div>
+
+  <!-- ÉTAT & PRIX -->
+  <div class="form-section">
+    <div class="form-section-title">État & prix</div>
+
+    <div class="form-group">
+      <label>État du produit</label>
+      <div class="radio-group">
+        <div class="radio-option">
+          <input type="radio" name="etat" id="etat-neuf" value="neuf" checked>
+          <label for="etat-neuf">Neuf</label>
+        </div>
+        <div class="radio-option">
+          <input type="radio" name="etat" id="etat-reconditionne" value="reconditionne">
+          <label for="etat-reconditionne">Reconditionné</label>
+        </div>
+        <div class="radio-option">
+          <input type="radio" name="etat" id="etat-occasion" value="occasion">
+          <label for="etat-occasion">Occasion</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group" style="max-width:220px;">
+      <label>Prix HT (€)</label>
+      <input type="number" id="f-prix" placeholder="0.00" min="0" step="0.01">
+      <div class="form-hint">Laissez vide pour afficher "Sur devis"</div>
+    </div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="publish-footer">
+    <a href="marketplace.html" class="btn btn-ghost">Annuler</a>
+    <button class="btn btn-primary btn-lg" id="btn-publier" onclick="publier()">Publier l'annonce</button>
+  </div>
+
+</div>
+
+<script src="auth-guard.js"></script>
+<script>
+var selectedFiles = [];
+
+(async function() {
+  const user = await requireAuth();
+  await initNav(user);
+  initUpload();
+})();
+
+function toggleMobileNav() {
+  document.getElementById('mobile-nav').classList.toggle('open');
+}
+
+function initUpload() {
+  var input = document.getElementById('f-images');
+  var zone  = document.getElementById('upload-zone');
+
+  input.addEventListener('change', function() {
+    ajouterFichiers(Array.from(this.files));
+    this.value = '';
+  });
+
+  zone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    zone.classList.add('dragover');
+  });
+  zone.addEventListener('dragleave', function() {
+    zone.classList.remove('dragover');
+  });
+  zone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    ajouterFichiers(Array.from(e.dataTransfer.files));
+  });
+}
+
+function ajouterFichiers(files) {
+  files.forEach(function(f) {
+    if (selectedFiles.length >= 5) return;
+    if (!f.type.match(/image\/(jpeg|png|webp)/)) return;
+    selectedFiles.push(f);
+  });
+  renderPreviews();
+}
+
+function renderPreviews() {
+  var container = document.getElementById('upload-previews');
+  container.innerHTML = '';
+  selectedFiles.forEach(function(f, i) {
+    var url  = URL.createObjectURL(f);
+    var item = document.createElement('div');
+    item.className = 'upload-preview-item';
+    item.innerHTML = '<img src="' + url + '" alt="">'
+      + '<button class="upload-preview-remove" onclick="retirerPhoto(' + i + ')">×</button>';
+    container.appendChild(item);
+  });
+  var zone = document.getElementById('upload-zone');
+  zone.style.display = selectedFiles.length >= 5 ? 'none' : '';
+}
+
+function retirerPhoto(i) {
+  selectedFiles.splice(i, 1);
+  renderPreviews();
+}
+
+async function publier() {
+  var error = document.getElementById('publish-error');
+  error.style.display = 'none';
+
+  var titre       = document.getElementById('f-titre').value.trim();
+  var categorie   = document.getElementById('f-categorie').value;
+  var region      = document.getElementById('f-region').value || '';
+  var description = document.getElementById('f-description').value.trim() || '';
+  var etat        = document.querySelector('input[name="etat"]:checked').value;
+  var prixRaw     = document.getElementById('f-prix').value;
+
+  if (!titre)     return showError('Veuillez saisir un titre.');
+  if (!categorie) return showError('Veuillez choisir une catégorie.');
+
+  var btn = document.getElementById('btn-publier');
+  btn.disabled = true;
+  btn.textContent = 'Publication…';
+
+  try {
+    var fd = new FormData();
+    fd.append('titre',       titre);
+    fd.append('categorie',   categorie);
+    fd.append('region',      region);
+    fd.append('description', description);
+    fd.append('etat',        etat);
+    if (prixRaw) fd.append('prix_ht', prixRaw);
+    selectedFiles.forEach(function(f) { fd.append('images', f); });
+
+    var res  = await fetch(API + '/produits', { method: 'POST', credentials: 'include', body: fd });
+    var data = await res.json();
+    if (!res.ok) return showError(data.error || 'Erreur lors de la publication.');
+    window.location.href = 'product.html?id=' + data.id;
+  } catch {
+    showError('Impossible de contacter le serveur.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Publier l'annonce";
+  }
+}
+
+function showError(msg) {
+  var el = document.getElementById('publish-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mes annonces — Kaer Seller</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.page-header {
+  background: var(--green);
+  padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 4vw, 3rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.page-header h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  color: #fff;
+  margin-bottom: 0.3rem;
+}
+.page-header p { font-size: 14px; color: rgba(255,255,255,.65); }
+
+.annonces-body {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 4vw, 2rem);
+}
+
+/* LISTE */
+.annonce-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  gap: 0;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  transition: box-shadow 0.2s;
+}
+.annonce-item:hover { box-shadow: var(--shadow); }
+
+.annonce-img {
+  background: var(--surface2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  min-height: 100px;
+}
+
+.annonce-info {
+  padding: 1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.annonce-titre {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.annonce-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.annonce-prix {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  color: var(--brown);
+  font-weight: 700;
+}
+
+.annonce-date {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.annonce-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 1rem;
+  justify-content: center;
+  border-left: 1px solid var(--border);
+  min-width: 120px;
+}
+
+/* EMPTY */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--muted);
+}
+.empty-state-icon { font-size: 3rem; margin-bottom: 1rem; }
+.empty-state-title { font-size: 16px; font-weight: 500; color: var(--text2); margin-bottom: 0.5rem; }
+.empty-state-text { font-size: 13px; margin-bottom: 1.5rem; }
+
+/* MODAL CONFIRM */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  max-width: 380px;
+  width: 90%;
+  box-shadow: var(--shadow-lg);
+}
+.modal h3 {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  margin-bottom: 0.6rem;
+}
+.modal p { font-size: 14px; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.6; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+@media (max-width: 600px) {
+  .annonce-item { grid-template-columns: 80px 1fr; }
+  .annonce-actions { grid-column: 1/-1; flex-direction: row; border-left: none; border-top: 1px solid var(--border); padding: 0.8rem 1rem; }
+  .annonce-actions .btn { flex: 1; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a class="navbar-logo" href="marketplace.html">
+    <span class="navbar-logo-icon">⬡</span>
+    Kaer Seller
+  </a>
+  <div class="navbar-nav">
+    <a class="nav-link" href="marketplace.html">Catalogue</a>
+    <a class="nav-link" href="mes-achats.html">Mes achats</a>
+    <a class="nav-link active" href="mes-annonces.html">Mes annonces</a>
+    <span class="nav-link-wrap"><a class="nav-link" href="messages.html">Messages</a><span class="nav-badge" id="msg-badge"></span></span>
+  </div>
+  <div class="navbar-actions">
+    <div class="navbar-search">
+      <svg class="navbar-search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8.5" cy="8.5" r="5.5"/><line x1="13" y1="13" x2="18" y2="18"/></svg>
+      <input type="search" placeholder="Rechercher un produit…">
+    </div>
+    <a href="publier.html" class="btn btn-ghost btn-sm">+ Publier</a>
+    <div class="avatar-wrap">
+      <div class="avatar" id="nav-avatar" onclick="toggleDropdown()" style="cursor:pointer"></div>
+      <div class="avatar-dropdown" id="avatar-dropdown">
+        <div class="avatar-dropdown-header">
+          <span class="avatar-dropdown-name" id="dd-name"></span>
+          <span class="avatar-dropdown-email" id="dd-email"></span>
+        </div>
+        <a class="avatar-dropdown-item" href="#">👤 Mon profil</a>
+        <a class="avatar-dropdown-item" href="mes-annonces.html">📋 Mes annonces</a>
+        <div class="avatar-dropdown-sep"></div>
+        <button class="avatar-dropdown-item danger" onclick="logout()">↩ Se déconnecter</button>
+      </div>
+    </div>
+  </div>
+  <button class="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-nav" id="mobile-nav">
+  <a class="nav-link" href="marketplace.html">Catalogue</a>
+  <a class="nav-link" href="#">Mes achats</a>
+  <a class="nav-link active" href="mes-annonces.html">Mes annonces</a>
+  <a class="nav-link" href="messages.html">Messages</a>
+  <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);">
+    <a href="publier.html" class="btn btn-primary btn-full">+ Publier une annonce</a>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="page-header">
+  <div>
+    <h1>Mes annonces</h1>
+    <p id="header-count">Chargement…</p>
+  </div>
+  <a href="publier.html" class="btn btn-primary">+ Nouvelle annonce</a>
+</div>
+
+<!-- CONTENU -->
+<div class="annonces-body">
+  <div id="annonces-list"></div>
+</div>
+
+<!-- MODAL SUPPRESSION -->
+<div class="modal-overlay" id="modal-suppr">
+  <div class="modal">
+    <h3>Supprimer l'annonce</h3>
+    <p>Cette action est irréversible. L'annonce sera définitivement supprimée.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="fermerModal()">Annuler</button>
+      <button class="btn btn-primary" style="background:#c0392b;border-color:#c0392b;" onclick="confirmerSuppr()">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<script src="auth-guard.js"></script>
+<script>
+var idASupprimer = null;
+
+(async function() {
+  const user = await requireAuth();
+  await initNav(user);
+  await chargerAnnonces();
+})();
+
+function toggleMobileNav() {
+  document.getElementById('mobile-nav').classList.toggle('open');
+}
+
+function badgeEtat(etat) {
+  var map = { neuf: ['badge-green','Neuf'], occasion: ['badge-gray','Occasion'], reconditionne: ['badge-brown','Reconditionné'] };
+  var b = map[etat] || ['badge-gray', etat];
+  return '<span class="badge ' + b[0] + '">' + b[1] + '</span>';
+}
+
+async function chargerAnnonces() {
+  var liste = document.getElementById('annonces-list');
+  try {
+    var res  = await fetch(API + '/produits/moi', { credentials: 'include' });
+    var data = await res.json();
+
+    var count = document.getElementById('header-count');
+    count.textContent = data.length + ' annonce' + (data.length > 1 ? 's' : '') + ' publiée' + (data.length > 1 ? 's' : '');
+
+    if (!data.length) {
+      liste.innerHTML = '<div class="empty-state">'
+        + '<div class="empty-state-icon">📭</div>'
+        + '<div class="empty-state-title">Aucune annonce pour l\'instant</div>'
+        + '<div class="empty-state-text">Publiez votre première annonce et touchez des milliers de professionnels.</div>'
+        + '<a href="publier.html" class="btn btn-primary">+ Publier une annonce</a>'
+        + '</div>';
+      return;
+    }
+
+    liste.innerHTML = data.map(function(p) {
+      var prix = p.prix_ht
+        ? parseFloat(p.prix_ht).toLocaleString('fr-FR') + ' € HT'
+        : 'Sur devis';
+      var date = new Date(p.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+      var imgs = p.images ? JSON.parse(p.images) : [];
+      var imgHtml = imgs.length
+        ? '<img src="/uploads/' + imgs[0] + '" alt="" style="width:100%;height:100%;object-fit:cover;">'
+        : '🏇';
+      return '<div class="annonce-item">'
+        + '<div class="annonce-img">' + imgHtml + '</div>'
+        + '<div class="annonce-info">'
+        + '<div class="annonce-titre">' + escHtml(p.titre) + '</div>'
+        + '<div class="annonce-meta">' + badgeEtat(p.etat) + '<span>' + escHtml(p.categorie) + '</span>' + (p.region ? '<span>· ' + escHtml(p.region) + '</span>' : '') + '</div>'
+        + '<div class="annonce-prix">' + prix + '</div>'
+        + '<div class="annonce-date">Publiée le ' + date + '</div>'
+        + '</div>'
+        + '<div class="annonce-actions">'
+        + '<a href="product.html?id=' + p.id + '" class="btn btn-ghost btn-sm">Voir</a>'
+        + '<a href="publier.html?edit=' + p.id + '" class="btn btn-ghost btn-sm">Modifier</a>'
+        + '<button class="btn btn-sm" style="color:#c0392b;border-color:#fca5a5;background:transparent;" onclick="demanderSuppr(' + p.id + ')">Supprimer</button>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+  } catch {
+    liste.innerHTML = '<div style="text-align:center;padding:3rem;color:#b91c1c;">Erreur de chargement.</div>';
+  }
+}
+
+function demanderSuppr(id) {
+  idASupprimer = id;
+  document.getElementById('modal-suppr').classList.add('open');
+}
+
+function fermerModal() {
+  document.getElementById('modal-suppr').classList.remove('open');
+  idASupprimer = null;
+}
+
+async function confirmerSuppr() {
+  if (!idASupprimer) return;
+  try {
+    var res = await fetch(API + '/produits/' + idASupprimer, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+    if (res.ok) {
+      fermerModal();
+      await chargerAnnonces();
+    }
+  } catch {
+    alert('Erreur lors de la suppression.');
+  }
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

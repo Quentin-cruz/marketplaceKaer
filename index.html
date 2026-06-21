@@ -238,6 +238,16 @@
 }
 .notice-icon { flex-shrink: 0; font-size: 15px; margin-top: 1px; }
 
+.form-error {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #b91c1c;
+  border-radius: var(--radius);
+  padding: 9px 12px;
+  font-size: 13px;
+  margin-bottom: 1rem;
+}
+
 .hint {
   font-size: 11.5px;
   color: var(--muted);
@@ -375,16 +385,17 @@
       <!-- LOGIN -->
       <div class="form-panel active" id="panel-login">
         <p class="auth-subtitle">Bon retour sur Kaer Seller !</p>
+        <div id="login-error" class="form-error" style="display:none"></div>
         <div class="form-group">
           <label>Adresse e-mail</label>
-          <input type="email" placeholder="vous@entreprise.fr" autocomplete="email">
+          <input type="email" id="login-email" placeholder="vous@entreprise.fr" autocomplete="email">
         </div>
         <div class="form-group">
           <label>Mot de passe</label>
-          <input type="password" placeholder="••••••••" autocomplete="current-password">
+          <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
           <div class="forgot"><a href="#">Mot de passe oublié ?</a></div>
         </div>
-        <button class="btn btn-primary btn-full btn-lg">Se connecter</button>
+        <button class="btn btn-primary btn-full btn-lg" onclick="handleLogin()">Se connecter</button>
         <div class="divider">ou</div>
         <div class="auth-toggle">
           Pas encore de compte ?
@@ -398,24 +409,25 @@
           <span class="notice-icon">🛡️</span>
           Accès réservé aux professionnels. Votre SIRET sera vérifié automatiquement via l'INSEE Sirene.
         </div>
+        <div id="register-error" class="form-error" style="display:none"></div>
         <div class="form-group">
           <label>Raison sociale</label>
-          <input type="text" placeholder="Ma Sellerie SAS" autocomplete="organization">
+          <input type="text" id="reg-raison" placeholder="Ma Sellerie SAS" autocomplete="organization">
         </div>
         <div class="form-group">
           <label>Numéro de SIRET</label>
-          <input type="text" placeholder="00000000000000" maxlength="14" inputmode="numeric">
+          <input type="text" id="reg-siret" placeholder="00000000000000" maxlength="14" inputmode="numeric">
           <div class="hint">14 chiffres · Vérification automatique INSEE Sirene</div>
         </div>
         <div class="form-group">
           <label>E-mail professionnel</label>
-          <input type="email" placeholder="vous@entreprise.fr" autocomplete="email">
+          <input type="email" id="reg-email" placeholder="vous@entreprise.fr" autocomplete="email">
         </div>
         <div class="form-group">
           <label>Mot de passe</label>
-          <input type="password" placeholder="Minimum 8 caractères" autocomplete="new-password">
+          <input type="password" id="reg-password" placeholder="Minimum 8 caractères" autocomplete="new-password">
         </div>
-        <button class="btn btn-primary btn-full btn-lg">Créer mon compte</button>
+        <button class="btn btn-primary btn-full btn-lg" onclick="handleRegister()">Créer mon compte</button>
         <div class="auth-toggle" style="margin-top:1rem">
           Déjà inscrit ?
           <a class="auth-link" href="#" onclick="switchTab('login'); return false;">Se connecter</a>
@@ -428,12 +440,81 @@
 </div>
 
 <script>
+const API = 'http://localhost:3001/api';
+
 function switchTab(tab) {
   document.querySelectorAll('.tab').forEach(function(t, i) {
     t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
   });
   document.getElementById('panel-login').classList.toggle('active', tab === 'login');
   document.getElementById('panel-register').classList.toggle('active', tab === 'register');
+}
+
+function showError(id, msg) {
+  var el = document.getElementById(id);
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function hideError(id) {
+  document.getElementById(id).style.display = 'none';
+}
+function setLoading(btnId, loading) {
+  var btn = document.querySelector('#panel-' + btnId + ' .btn-primary');
+  btn.disabled = loading;
+  btn.textContent = loading
+    ? (btnId === 'login' ? 'Connexion…' : 'Création…')
+    : (btnId === 'login' ? 'Se connecter' : 'Créer mon compte');
+}
+
+async function handleLogin() {
+  hideError('login-error');
+  var email    = document.getElementById('login-email').value.trim();
+  var password = document.getElementById('login-password').value;
+  if (!email || !password) return showError('login-error', 'Veuillez remplir tous les champs.');
+
+  setLoading('login', true);
+  try {
+    var res  = await fetch(API + '/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email, password }),
+    });
+    var data = await res.json();
+    if (!res.ok) return showError('login-error', data.error || 'Erreur de connexion.');
+    window.location.href = 'marketplace.html';
+  } catch {
+    showError('login-error', 'Impossible de contacter le serveur.');
+  } finally {
+    setLoading('login', false);
+  }
+}
+
+async function handleRegister() {
+  hideError('register-error');
+  var raison_sociale = document.getElementById('reg-raison').value.trim();
+  var siret          = document.getElementById('reg-siret').value.trim();
+  var email          = document.getElementById('reg-email').value.trim();
+  var password       = document.getElementById('reg-password').value;
+  if (!raison_sociale || !siret || !email || !password)
+    return showError('register-error', 'Veuillez remplir tous les champs.');
+
+  setLoading('register', true);
+  try {
+    var res  = await fetch(API + '/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ raison_sociale, siret, email, password }),
+    });
+    var data = await res.json();
+    if (!res.ok) return showError('register-error', data.error || 'Erreur lors de l\'inscription.');
+    window.location.href = 'marketplace.html';
+  } catch {
+    showError('register-error', 'Impossible de contacter le serveur.');
+  } finally {
+    setLoading('register', false);
+  }
 }
 </script>
 </body>

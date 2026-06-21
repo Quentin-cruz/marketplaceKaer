@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mes achats — Kaer Seller</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.page-header {
+  background: var(--green);
+  padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 4vw, 3rem);
+}
+.page-header h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  color: #fff;
+  margin-bottom: 0.3rem;
+}
+.page-header p { font-size: 14px; color: rgba(255,255,255,.65); }
+
+.achats-body {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 4vw, 2rem);
+}
+
+.coming-soon {
+  text-align: center;
+  padding: 5rem 2rem;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.coming-soon-icon { font-size: 3rem; margin-bottom: 1.2rem; }
+.coming-soon-title {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  color: var(--text);
+  margin-bottom: 0.6rem;
+}
+.coming-soon-text { font-size: 14px; line-height: 1.7; max-width: 400px; margin: 0 auto 2rem; }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a class="navbar-logo" href="marketplace.html">
+    <span class="navbar-logo-icon">⬡</span>
+    Kaer Seller
+  </a>
+  <div class="navbar-nav">
+    <a class="nav-link" href="marketplace.html">Catalogue</a>
+    <a class="nav-link active" href="mes-achats.html">Mes achats</a>
+    <a class="nav-link" href="mes-annonces.html">Mes annonces</a>
+    <span class="nav-link-wrap"><a class="nav-link" href="messages.html">Messages</a><span class="nav-badge" id="msg-badge"></span></span>
+  </div>
+  <div class="navbar-actions">
+    <div class="navbar-search">
+      <svg class="navbar-search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8.5" cy="8.5" r="5.5"/><line x1="13" y1="13" x2="18" y2="18"/></svg>
+      <input type="search" placeholder="Rechercher un produit…">
+    </div>
+    <a href="publier.html" class="btn btn-ghost btn-sm">+ Publier</a>
+    <div class="avatar-wrap">
+      <div class="avatar" id="nav-avatar" onclick="toggleDropdown()" style="cursor:pointer"></div>
+      <div class="avatar-dropdown" id="avatar-dropdown">
+        <div class="avatar-dropdown-header">
+          <span class="avatar-dropdown-name" id="dd-name"></span>
+          <span class="avatar-dropdown-email" id="dd-email"></span>
+        </div>
+        <a class="avatar-dropdown-item" href="#">👤 Mon profil</a>
+        <a class="avatar-dropdown-item" href="mes-annonces.html">📋 Mes annonces</a>
+        <div class="avatar-dropdown-sep"></div>
+        <button class="avatar-dropdown-item danger" onclick="logout()">↩ Se déconnecter</button>
+      </div>
+    </div>
+  </div>
+  <button class="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-nav" id="mobile-nav">
+  <a class="nav-link" href="marketplace.html">Catalogue</a>
+  <a class="nav-link active" href="mes-achats.html">Mes achats</a>
+  <a class="nav-link" href="mes-annonces.html">Mes annonces</a>
+  <a class="nav-link" href="messages.html">Messages</a>
+</div>
+
+<div class="page-header">
+  <h1>Mes achats</h1>
+  <p>Retrouvez ici l'historique de vos transactions.</p>
+</div>
+
+<div class="achats-body">
+  <div class="coming-soon">
+    <div class="coming-soon-icon">🛒</div>
+    <div class="coming-soon-title">Fonctionnalité à venir</div>
+    <div class="coming-soon-text">
+      Le suivi des achats sera disponible prochainement. Vous pourrez retrouver ici l'historique de vos transactions, vos factures et le statut de vos commandes.
+    </div>
+    <a href="marketplace.html" class="btn btn-primary">Parcourir le catalogue</a>
+  </div>
+</div>
+
+<script src="auth-guard.js"></script>
+<script>
+(async function() {
+  const user = await requireAuth();
+  await initNav(user);
+})();
+
+function toggleMobileNav() {
+  document.getElementById('mobile-nav').classList.toggle('open');
+}
+</script>
+</body>
+</html>

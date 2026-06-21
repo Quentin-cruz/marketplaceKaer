@@ -1,0 +1,21 @@
+# Claude
+.claude/
+
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Uploads
+uploads/
+
+# OS
+.DS_Store
+Thumbs.db

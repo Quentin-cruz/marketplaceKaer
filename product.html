@@ -394,18 +394,30 @@
 
   <div class="navbar-nav">
     <a class="nav-link" href="marketplace.html">Catalogue</a>
-    <a class="nav-link" href="#">Mes achats</a>
-    <a class="nav-link" href="#">Mes annonces</a>
-    <a class="nav-link" href="#">Messages</a>
+    <a class="nav-link" href="mes-achats.html">Mes achats</a>
+    <a class="nav-link" href="mes-annonces.html">Mes annonces</a>
+    <span class="nav-link-wrap"><a class="nav-link" href="messages.html">Messages</a><span class="nav-badge" id="msg-badge"></span></span>
   </div>
 
   <div class="navbar-actions">
     <div class="navbar-search">
-      <span class="navbar-search-icon">🔍</span>
+      <svg class="navbar-search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8.5" cy="8.5" r="5.5"/><line x1="13" y1="13" x2="18" y2="18"/></svg>
       <input type="search" placeholder="Rechercher un produit…">
     </div>
-    <a href="#" class="btn btn-ghost btn-sm">+ Publier</a>
-    <div class="avatar" title="Mon compte">QC</div>
+    <a href="publier.html" class="btn btn-ghost btn-sm">+ Publier</a>
+    <div class="avatar-wrap">
+      <div class="avatar" id="nav-avatar" onclick="toggleDropdown()" style="cursor:pointer"></div>
+      <div class="avatar-dropdown" id="avatar-dropdown">
+        <div class="avatar-dropdown-header">
+          <span class="avatar-dropdown-name" id="dd-name"></span>
+          <span class="avatar-dropdown-email" id="dd-email"></span>
+        </div>
+        <a class="avatar-dropdown-item" href="#">👤 Mon profil</a>
+        <a class="avatar-dropdown-item" href="mes-annonces.html">📋 Mes annonces</a>
+        <div class="avatar-dropdown-sep"></div>
+        <button class="avatar-dropdown-item danger" onclick="logout()">↩ Se déconnecter</button>
+      </div>
+    </div>
   </div>
 
   <button class="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
@@ -436,18 +448,11 @@
 
   <!-- GALLERY -->
   <div class="gallery">
-    <div class="gallery-main">
-      🏇
-      <div class="gallery-main-badge">
-        <span class="badge badge-green">Neuf · En stock</span>
-      </div>
+    <div class="gallery-main" id="gallery-main">
+      <span style="font-size:3rem;">🏇</span>
+      <div class="gallery-main-badge" id="gallery-badge"></div>
     </div>
-    <div class="gallery-thumbs">
-      <div class="gallery-thumb active">🏇</div>
-      <div class="gallery-thumb" style="background:var(--green-pale);">🧵</div>
-      <div class="gallery-thumb" style="background:var(--brown-pale);">📐</div>
-      <div class="gallery-thumb" style="background:var(--surface3);">🔖</div>
-    </div>
+    <div class="gallery-thumbs" id="gallery-thumbs"></div>
 
     <!-- TABS DESCRIPTION (on desktop, below gallery) -->
     <div style="margin-top:2rem;">
@@ -458,11 +463,7 @@
       </div>
 
       <div class="info-panel active" id="info-desc">
-        <div class="description">
-          <p>La selle de dressage <strong>Équilibre Pro</strong> est fabriquée à partir de cuir pleine fleur tanné végétal, sélectionné pour sa durabilité et son confort. Conçue pour les professionnels exigeants, elle offre un assiette profonde et une sécurité maximale lors des reprises de haute école.</p>
-          <p>Les quartiers sont cousus main avec du fil de lin ciré. La selle est livrée avec sa housse de transport et son certificat d'authenticité.</p>
-          <p>Disponible en finition naturelle (havane) ou teintée (noir, brun foncé). Personnalisation possible sur devis pour les commandes de plus de 5 unités.</p>
-        </div>
+        <div class="description" id="p-description"></div>
       </div>
 
       <div class="info-panel" id="info-specs">
@@ -520,28 +521,14 @@
   <div class="product-info">
 
     <div class="product-info-header">
-      <div class="product-category">Sellerie · Selles de dressage</div>
-      <h1 class="product-title">Selle de dressage cuir pleine fleur — Modèle Équilibre Pro</h1>
-      <div class="product-rating">
-        <span class="stars">★★★★★</span>
-        <span>4,7</span>
-        <span class="rating-count">(14 avis)</span>
-        <span class="product-meta-dot" style="width:3px;height:3px;background:var(--border2);border-radius:50%;"></span>
-        <span>42 ventes</span>
-      </div>
+      <div class="product-category" id="p-categorie"></div>
+      <h1 class="product-title" id="p-titre"></h1>
     </div>
 
     <!-- PRICING -->
     <div class="pricing-box">
-      <div class="price-ht">1 240 €</div>
-      <div class="price-ttc">soit 1 488 € TTC · Prix HT affiché</div>
-
-      <div class="price-volume">
-        <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Tarifs dégressifs</div>
-        <div class="price-tier"><span>1 – 4 unités</span> <span class="price-tier-label">1 240 € / u</span></div>
-        <div class="price-tier"><span>5 – 9 unités</span> <span class="price-tier-label">1 150 € / u <span style="color:var(--green)">−7%</span></span></div>
-        <div class="price-tier best"><span>10 + unités</span> <span class="price-tier-label">1 050 € / u <span>−15%</span></span></div>
-      </div>
+      <div class="price-ht" id="p-prix"></div>
+      <div class="price-ttc" id="p-prix-ttc"></div>
 
       <div class="stock-info" style="margin-bottom:1rem;">
         <span class="stock-dot"></span>
@@ -549,7 +536,7 @@
       </div>
 
       <div class="cta-row">
-        <button class="btn btn-primary btn-lg" style="flex:1">🛒 Contacter le vendeur</button>
+        <button class="btn btn-primary btn-lg" id="btn-contact" style="flex:1" onclick="contacterVendeur()">💬 Contacter le vendeur</button>
         <button class="btn btn-outline btn-lg" style="min-width:46px;padding:14px;">🤍</button>
       </div>
     </div>
@@ -558,11 +545,10 @@
     <div class="seller-card">
       <div class="seller-avatar">🏪</div>
       <div class="seller-info">
-        <div class="seller-name">Sellerie Dupont & Fils</div>
-        <div class="seller-meta">⭐ 4,9 · 127 ventes · Depuis 2019</div>
-        <div class="seller-siret">✓ SIRET 52314789600024 vérifié INSEE</div>
+        <div class="seller-name" id="p-seller-name"></div>
+        <div class="seller-meta" id="p-seller-region"></div>
       </div>
-      <a href="#" class="btn btn-ghost btn-sm">Contacter</a>
+      <a href="#" class="btn btn-ghost btn-sm" id="btn-seller-contact">Contacter</a>
     </div>
 
     <!-- TRUST BADGES -->
@@ -641,7 +627,111 @@
   </div>
 </div>
 
+<script src="auth-guard.js"></script>
 <script>
+(async function() {
+  const user = await requireAuth();
+  await initNav(user);
+  await loadProduit();
+})();
+
+async function loadProduit() {
+  var id = new URLSearchParams(window.location.search).get('id');
+  if (!id) return showErreur('Aucun produit sélectionné.');
+
+  try {
+    var res = await fetch(API + '/produits/' + id, { credentials: 'include' });
+    if (!res.ok) return showErreur('Produit introuvable.');
+    var p = await res.json();
+
+    window._produit = p;
+
+    // Breadcrumb
+    document.querySelector('.breadcrumb-current').textContent = p.titre;
+
+    // Infos principales
+    document.getElementById('p-categorie').textContent = p.categorie;
+    document.getElementById('p-titre').textContent = p.titre;
+
+    // Prix
+    if (p.prix_ht) {
+      var ht  = parseFloat(p.prix_ht);
+      var ttc = (ht * 1.2).toFixed(2);
+      document.getElementById('p-prix').textContent = ht.toLocaleString('fr-FR') + ' €';
+      document.getElementById('p-prix-ttc').textContent = 'soit ' + parseFloat(ttc).toLocaleString('fr-FR') + ' € TTC · Prix HT affiché';
+    } else {
+      document.getElementById('p-prix').textContent = 'Sur devis';
+      document.getElementById('p-prix-ttc').textContent = 'Contactez le vendeur pour obtenir un tarif';
+    }
+
+    // Description
+    var desc = document.getElementById('p-description');
+    desc.innerHTML = p.description
+      ? '<p>' + p.description.replace(/\n/g, '</p><p>') + '</p>'
+      : '<p style="color:var(--muted)">Aucune description fournie.</p>';
+
+    // Vendeur
+    document.getElementById('p-seller-name').textContent = p.raison_sociale;
+    document.getElementById('p-seller-region').textContent = p.seller_region || p.region || '';
+
+    // Badge état
+    var badge  = document.getElementById('gallery-badge');
+    var labels = { neuf: 'Neuf', occasion: 'Occasion', reconditionne: 'Reconditionné' };
+    var classes = { neuf: 'badge-green', occasion: 'badge-gray', reconditionne: 'badge-brown' };
+    badge.innerHTML = '<span class="badge ' + (classes[p.etat] || 'badge-gray') + '">' + (labels[p.etat] || p.etat) + ' · En ligne</span>';
+
+    // Galerie photos
+    var imgs   = p.images ? JSON.parse(p.images) : [];
+    var main   = document.getElementById('gallery-main');
+    var thumbs = document.getElementById('gallery-thumbs');
+    if (imgs.length) {
+      main.innerHTML = '<img id="gallery-main-img" src="/uploads/' + imgs[0] + '" alt="" style="width:100%;height:100%;object-fit:contain;display:block;">'
+        + '<div class="gallery-main-badge" id="gallery-badge"></div>';
+      document.getElementById('gallery-badge').innerHTML = badge.innerHTML;
+      if (imgs.length > 1) {
+        thumbs.innerHTML = imgs.map(function(f, i) {
+          return '<div class="gallery-thumb' + (i === 0 ? ' active' : '') + '" onclick="changerPhoto(\'' + f + '\', this)">'
+            + '<img src="/uploads/' + f + '" alt="" style="width:100%;height:100%;object-fit:cover;">'
+            + '</div>';
+        }).join('');
+      } else {
+        thumbs.style.display = 'none';
+      }
+    } else {
+      main.innerHTML = '<span style="font-size:3rem;">🏇</span><div class="gallery-main-badge" id="gallery-badge">' + badge.innerHTML + '</div>';
+      thumbs.innerHTML = '<div class="gallery-thumb active" style="font-size:1.5rem;">🏇</div>';
+    }
+
+    // Titre de la page
+    document.title = p.titre + ' — Kaer Seller';
+
+  } catch (err) {
+    showErreur('Erreur lors du chargement du produit.');
+  }
+}
+
+function changerPhoto(filename, thumbEl) {
+  var mainImg = document.getElementById('gallery-main-img');
+  if (mainImg) mainImg.src = '/uploads/' + filename;
+  document.querySelectorAll('.gallery-thumb').forEach(function(t) { t.classList.remove('active'); });
+  thumbEl.classList.add('active');
+}
+
+function contacterVendeur() {
+  if (!window._produit) return;
+  var p = window._produit;
+  window.location.href = 'messages.html?to=' + p.seller_id + '&produit=' + p.id;
+}
+
+function showErreur(msg) {
+  document.querySelector('.product-page').innerHTML =
+    '<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--muted);">'
+    + '<div style="font-size:2rem;margin-bottom:1rem;">😕</div>'
+    + '<div style="font-size:16px;color:var(--text2);">' + msg + '</div>'
+    + '<a href="marketplace.html" class="btn btn-ghost btn-sm" style="margin-top:1.5rem;">← Retour au catalogue</a>'
+    + '</div>';
+}
+
 function toggleMobileNav() {
   document.getElementById('mobile-nav').classList.toggle('open');
 }
