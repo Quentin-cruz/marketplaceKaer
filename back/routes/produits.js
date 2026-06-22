@@ -62,7 +62,7 @@ router.get('/:id', async (req, res) => {
 
 // POST /api/produits — créer une annonce avec photos optionnelles
 router.post('/', requireAuth, upload.array('images', 5), async (req, res) => {
-  const { titre, description, categorie, prix_ht, etat, region } = req.body;
+  const { titre, description, categorie, prix_ht, etat, region, caracteristiques } = req.body;
 
   if (!titre || !categorie || !etat)
     return res.status(400).json({ error: 'Titre, catégorie et état sont requis' });
@@ -71,10 +71,12 @@ router.post('/', requireAuth, upload.array('images', 5), async (req, res) => {
     ? JSON.stringify(req.files.map(f => f.filename))
     : null;
 
+  const carac = caracteristiques || null;
+
   try {
     const [result] = await db.query(
-      'INSERT INTO produits (seller_id, titre, description, categorie, prix_ht, etat, region, images) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [req.user.id, titre, description || null, categorie, prix_ht || null, etat, region || null, images]
+      'INSERT INTO produits (seller_id, titre, description, categorie, prix_ht, etat, region, images, caracteristiques) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [req.user.id, titre, description || null, categorie, prix_ht || null, etat, region || null, images, carac]
     );
     res.status(201).json({ id: result.insertId });
   } catch (err) {
@@ -96,6 +98,36 @@ router.post('/:id/images', requireAuth, upload.array('images', 5), async (req, r
 
     await db.query('UPDATE produits SET images = ? WHERE id = ?', [JSON.stringify(toutes), req.params.id]);
     res.json({ images: toutes });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// PUT /api/produits/:id — modifier sa propre annonce
+router.put('/:id', requireAuth, upload.array('images', 5), async (req, res) => {
+  const { titre, description, categorie, prix_ht, etat, region, caracteristiques } = req.body;
+
+  if (!titre || !categorie || !etat)
+    return res.status(400).json({ error: 'Titre, catégorie et état sont requis' });
+
+  try {
+    const [rows] = await db.query('SELECT seller_id, images FROM produits WHERE id = ?', [req.params.id]);
+    if (!rows[0]) return res.status(404).json({ error: 'Produit introuvable' });
+    if (rows[0].seller_id !== req.user.id) return res.status(403).json({ error: 'Non autorisé' });
+
+    // images existantes que le front veut conserver
+    const kept     = req.body['existingImages[]']
+      ? (Array.isArray(req.body['existingImages[]']) ? req.body['existingImages[]'] : [req.body['existingImages[]']])
+      : [];
+    const nouvelles = req.files ? req.files.map(f => f.filename) : [];
+    const images    = JSON.stringify([...kept, ...nouvelles].slice(0, 5)) || null;
+
+    await db.query(
+      'UPDATE produits SET titre=?, description=?, categorie=?, prix_ht=?, etat=?, region=?, images=?, caracteristiques=? WHERE id=?',
+      [titre, description || null, categorie, prix_ht || null, etat, region || null, images, caracteristiques || null, req.params.id]
+    );
+    res.json({ id: parseInt(req.params.id) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Erreur serveur' });

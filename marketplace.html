@@ -472,8 +472,9 @@
           <span class="avatar-dropdown-name" id="dd-name"></span>
           <span class="avatar-dropdown-email" id="dd-email"></span>
         </div>
-        <a class="avatar-dropdown-item" href="#">👤 Mon profil</a>
+        <a class="avatar-dropdown-item" href="profil.html">👤 Mon profil</a>
         <a class="avatar-dropdown-item" href="mes-annonces.html">📋 Mes annonces</a>
+        <a class="avatar-dropdown-item" href="favoris.html">🤍 Favoris</a>
         <div class="avatar-dropdown-sep"></div>
         <button class="avatar-dropdown-item danger" onclick="logout()">↩ Se déconnecter</button>
       </div>
@@ -587,11 +588,38 @@
 
 <script src="auth-guard.js"></script>
 <script>
+var _favorisIds = new Set();
+
 (async function() {
   const user = await requireAuth();
   await initNav(user);
+  await chargerFavorisIds();
   await loadProduits();
 })();
+
+async function chargerFavorisIds() {
+  try {
+    var res  = await fetch(API + '/favoris/ids', { credentials: 'include' });
+    var ids  = await res.json();
+    _favorisIds = new Set(ids.map(function(id) { return String(id); }));
+  } catch(e) {}
+}
+
+async function toggleFavori(e, produitId) {
+  e.preventDefault();
+  e.stopPropagation();
+  try {
+    var res  = await fetch(API + '/favoris/' + produitId, { method: 'POST', credentials: 'include' });
+    var data = await res.json();
+    if (data.favori) {
+      _favorisIds.add(String(produitId));
+    } else {
+      _favorisIds.delete(String(produitId));
+    }
+    var btn = document.getElementById('fav-' + produitId);
+    if (btn) btn.textContent = data.favori ? '❤️' : '🤍';
+  } catch(e) {}
+}
 
 // ===== FILTRES ACTIFS =====
 var activeFilters = { categorie: null, etat: null, region: null, sort: 'recent' };
@@ -614,11 +642,14 @@ function toggleEtat(el, value) {
 }
 
 function toggleRegion(el, value) {
+  var dejaActif = el.classList.contains('active');
   el.parentElement.querySelectorAll('.filter-item').forEach(function(i) { i.classList.remove('active'); });
-  var isActive = !el.dataset.selected;
-  el.dataset.selected = isActive ? '1' : '';
-  el.classList.toggle('active', isActive);
-  activeFilters.region = isActive ? value : null;
+  if (!dejaActif) {
+    el.classList.add('active');
+    activeFilters.region = value;
+  } else {
+    activeFilters.region = null;
+  }
   loadProduits();
 }
 
@@ -660,7 +691,7 @@ function renderCard(p) {
     + '<div class="product-img">'
     + imgHtml
     + '<div class="product-badge-wrap">' + badgeEtat(p.etat) + '</div>'
-    + '<div class="product-fav">🤍</div>'
+    + '<div class="product-fav" id="fav-' + p.id + '" onclick="toggleFavori(event,' + p.id + ')">' + (_favorisIds.has(String(p.id)) ? '❤️' : '🤍') + '</div>'
     + '</div>'
     + '<div class="product-body">'
     + '<div class="product-meta">' + p.categorie + '</div>'

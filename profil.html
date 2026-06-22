@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mon profil — Kaer Seller</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.profil-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 4vw, 2rem);
+}
+
+/* HERO */
+.profil-hero {
+  background: var(--green);
+  padding: clamp(2rem, 5vw, 3rem) clamp(1rem, 4vw, 3rem);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.profil-hero-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.2);
+  color: #fff;
+  font-family: var(--font-serif);
+  font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 2px solid rgba(255,255,255,.35);
+}
+
+.profil-hero-info { flex: 1; min-width: 0; }
+.profil-hero-name {
+  font-family: var(--font-serif);
+  font-size: clamp(1.3rem, 3vw, 1.8rem);
+  color: #fff;
+  margin-bottom: 0.2rem;
+}
+.profil-hero-meta { font-size: 13px; color: rgba(255,255,255,.65); }
+
+.profil-hero-stats {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+.profil-stat {
+  text-align: center;
+  color: #fff;
+}
+.profil-stat-value {
+  font-family: var(--font-serif);
+  font-size: 1.6rem;
+  line-height: 1;
+}
+.profil-stat-label { font-size: 11px; color: rgba(255,255,255,.6); margin-top: 2px; }
+
+/* CARDS */
+.profil-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1.2rem;
+}
+
+.profil-card-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* CHAMP LECTURE */
+.profil-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.profil-field:last-child { border-bottom: none; padding-bottom: 0; }
+.profil-field-label {
+  font-size: 12px;
+  color: var(--muted);
+  min-width: 140px;
+  padding-top: 2px;
+}
+.profil-field-value {
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 500;
+  flex: 1;
+}
+
+/* FORMULAIRE ÉDITION */
+.profil-form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 1.2rem;
+}
+
+.success-msg {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 1rem;
+  display: none;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 600px) {
+  .profil-hero { flex-direction: column; align-items: flex-start; }
+  .profil-hero-stats { margin-top: 0.5rem; }
+  .profil-field { flex-direction: column; gap: 3px; }
+  .profil-field-label { min-width: unset; }
+  .form-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a class="navbar-logo" href="marketplace.html">
+    <span class="navbar-logo-icon">⬡</span>
+    Kaer Seller
+  </a>
+  <div class="navbar-nav">
+    <a class="nav-link" href="marketplace.html">Catalogue</a>
+    <a class="nav-link" href="mes-achats.html">Mes achats</a>
+    <a class="nav-link" href="mes-annonces.html">Mes annonces</a>
+    <span class="nav-link-wrap"><a class="nav-link" href="messages.html">Messages</a><span class="nav-badge" id="msg-badge"></span></span>
+  </div>
+  <div class="navbar-actions">
+    <div class="navbar-search">
+      <svg class="navbar-search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8.5" cy="8.5" r="5.5"/><line x1="13" y1="13" x2="18" y2="18"/></svg>
+      <input type="search" placeholder="Rechercher un produit…">
+    </div>
+    <div class="avatar-wrap">
+      <div class="avatar" id="nav-avatar" onclick="toggleDropdown()" style="cursor:pointer"></div>
+      <div class="avatar-dropdown" id="avatar-dropdown">
+        <div class="avatar-dropdown-header">
+          <span class="avatar-dropdown-name" id="dd-name"></span>
+          <span class="avatar-dropdown-email" id="dd-email"></span>
+        </div>
+        <a class="avatar-dropdown-item active" href="profil.html">👤 Mon profil</a>
+        <a class="avatar-dropdown-item" href="mes-annonces.html">📋 Mes annonces</a>
+        <a class="avatar-dropdown-item" href="favoris.html">🤍 Favoris</a>
+        <div class="avatar-dropdown-sep"></div>
+        <button class="avatar-dropdown-item danger" onclick="logout()">↩ Se déconnecter</button>
+      </div>
+    </div>
+  </div>
+  <button class="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-nav" id="mobile-nav">
+  <a class="nav-link" href="marketplace.html">Catalogue</a>
+  <a class="nav-link" href="mes-achats.html">Mes achats</a>
+  <a class="nav-link" href="mes-annonces.html">Mes annonces</a>
+  <a class="nav-link" href="messages.html">Messages</a>
+</div>
+
+<!-- HERO -->
+<div class="profil-hero">
+  <div class="profil-hero-avatar" id="hero-avatar"></div>
+  <div class="profil-hero-info">
+    <div class="profil-hero-name" id="hero-name"></div>
+    <div class="profil-hero-meta" id="hero-meta"></div>
+  </div>
+  <div class="profil-hero-stats">
+    <div class="profil-stat">
+      <div class="profil-stat-value" id="stat-annonces">—</div>
+      <div class="profil-stat-label">annonces</div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTENU -->
+<div class="profil-page">
+
+  <!-- INFOS FIXES -->
+  <div class="profil-card">
+    <div class="profil-card-title">Informations légales</div>
+    <div class="profil-field">
+      <span class="profil-field-label">SIRET</span>
+      <span class="profil-field-value" id="info-siret">—</span>
+    </div>
+    <div class="profil-field">
+      <span class="profil-field-label">Email</span>
+      <span class="profil-field-value" id="info-email">—</span>
+    </div>
+    <div class="profil-field">
+      <span class="profil-field-label">Membre depuis</span>
+      <span class="profil-field-value" id="info-date">—</span>
+    </div>
+  </div>
+
+  <!-- INFOS MODIFIABLES -->
+  <div class="profil-card">
+    <div class="profil-card-title">Informations du compte</div>
+    <div class="success-msg" id="success-msg">Profil mis à jour avec succès.</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Prénom</label>
+        <input type="text" id="f-prenom" placeholder="Votre prénom">
+      </div>
+      <div class="form-group">
+        <label>Nom</label>
+        <input type="text" id="f-nom" placeholder="Votre nom">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Date de naissance</label>
+        <input type="date" id="f-ddn">
+      </div>
+      <div class="form-group">
+        <label>Téléphone</label>
+        <input type="tel" id="f-telephone" placeholder="06 00 00 00 00">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Ville</label>
+        <input type="text" id="f-ville" placeholder="Votre ville">
+      </div>
+      <div class="form-group">
+        <label>Région</label>
+        <select id="f-region">
+          <option value="">Non renseignée</option>
+          <option value="Bretagne">Bretagne</option>
+          <option value="Normandie">Normandie</option>
+          <option value="Pays de la Loire">Pays de la Loire</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Bio</label>
+      <textarea id="f-bio" placeholder="Présentez votre activité, votre spécialité, ce qui vous distingue…" style="min-height:100px;"></textarea>
+    </div>
+    <div id="edit-error" class="form-error" style="display:none;margin-top:0.8rem;"></div>
+    <div class="profil-form-actions">
+      <button class="btn btn-primary" onclick="sauvegarder()">Enregistrer</button>
+    </div>
+  </div>
+
+  <!-- ACTIONS RAPIDES -->
+  <div class="profil-card">
+    <div class="profil-card-title">Actions</div>
+    <div class="profil-field">
+      <span class="profil-field-label">Mes annonces</span>
+      <span class="profil-field-value"><a href="mes-annonces.html" class="btn btn-ghost btn-sm">Voir mes annonces</a></span>
+    </div>
+    <div class="profil-field">
+      <span class="profil-field-label">Nouvelle annonce</span>
+      <span class="profil-field-value"><a href="publier.html" class="btn btn-ghost btn-sm">+ Publier</a></span>
+    </div>
+  </div>
+
+</div>
+
+<script src="auth-guard.js"></script>
+<script>
+(async function() {
+  var user = await requireAuth();
+  await initNav(user);
+  await chargerProfil();
+})();
+
+function toggleMobileNav() {
+  document.getElementById('mobile-nav').classList.toggle('open');
+}
+
+async function chargerProfil() {
+  try {
+    var res  = await fetch(API + '/auth/profile', { credentials: 'include' });
+    var data = await res.json();
+
+    var initiales = data.raison_sociale.split(' ').slice(0, 2).map(function(w) { return w[0]; }).join('').toUpperCase();
+    document.getElementById('hero-avatar').textContent = initiales;
+    document.getElementById('hero-name').textContent   = data.raison_sociale;
+    document.getElementById('hero-meta').textContent   = (data.region || 'Région non renseignée') + ' · SIRET ' + data.siret;
+    document.getElementById('stat-annonces').textContent = data.nb_annonces;
+
+    document.getElementById('info-siret').textContent = data.siret;
+    document.getElementById('info-email').textContent = data.email;
+    document.getElementById('info-date').textContent  = new Date(data.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+
+    document.getElementById('f-prenom').value    = data.prenom    || '';
+    document.getElementById('f-nom').value       = data.nom       || '';
+    document.getElementById('f-ddn').value       = data.date_naissance ? data.date_naissance.split('T')[0] : '';
+    document.getElementById('f-telephone').value = data.telephone || '';
+    document.getElementById('f-ville').value      = data.ville     || '';
+    document.getElementById('f-bio').value        = data.bio       || '';
+    document.getElementById('f-region').value    = data.region    || '';
+  } catch {
+    /* silencieux */
+  }
+}
+
+async function sauvegarder() {
+  var errEl  = document.getElementById('edit-error');
+  var succEl = document.getElementById('success-msg');
+  errEl.style.display  = 'none';
+  succEl.style.display = 'none';
+
+  var prenom     = document.getElementById('f-prenom').value.trim();
+  var nom        = document.getElementById('f-nom').value.trim();
+  var ddn        = document.getElementById('f-ddn').value;
+  var telephone  = document.getElementById('f-telephone').value.trim();
+  var ville      = document.getElementById('f-ville').value.trim();
+  var bio        = document.getElementById('f-bio').value.trim();
+  var region     = document.getElementById('f-region').value;
+
+  try {
+    var res = await fetch(API + '/auth/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ prenom, nom, date_naissance: ddn || null, telephone, ville, bio, region }),
+    });
+    var data = await res.json();
+    if (!res.ok) {
+      errEl.textContent   = data.error || 'Erreur lors de la mise à jour.';
+      errEl.style.display = 'block';
+      return;
+    }
+    succEl.style.display = 'block';
+    await chargerProfil();
+  } catch {
+    errEl.textContent   = 'Impossible de contacter le serveur.';
+    errEl.style.display = 'block';
+  }
+}
+</script>
+</body>
+</html>

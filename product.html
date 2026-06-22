@@ -367,6 +367,39 @@
   gap: 1rem;
 }
 
+.product-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.product-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+
+.product-img {
+  aspect-ratio: 4/3;
+  background: var(--surface2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  overflow: hidden;
+  position: relative;
+}
+.product-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.product-badge-wrap { position: absolute; top: 8px; left: 8px; }
+
+.product-body { padding: 0.9rem; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.product-meta { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.product-name { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.4; }
+.product-price { font-family: var(--font-serif); font-size: 1rem; color: var(--brown); font-weight: 700; margin-top: 4px; }
+.product-price-unit { font-size: 0.7em; font-family: var(--font-sans); font-weight: 400; color: var(--muted); }
+.product-seller { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 960px) {
   .product-page { grid-template-columns: 1fr; gap: 2rem; }
@@ -412,8 +445,9 @@
           <span class="avatar-dropdown-name" id="dd-name"></span>
           <span class="avatar-dropdown-email" id="dd-email"></span>
         </div>
-        <a class="avatar-dropdown-item" href="#">👤 Mon profil</a>
+        <a class="avatar-dropdown-item" href="profil.html">👤 Mon profil</a>
         <a class="avatar-dropdown-item" href="mes-annonces.html">📋 Mes annonces</a>
+        <a class="avatar-dropdown-item" href="favoris.html">🤍 Favoris</a>
         <div class="avatar-dropdown-sep"></div>
         <button class="avatar-dropdown-item danger" onclick="logout()">↩ Se déconnecter</button>
       </div>
@@ -467,16 +501,8 @@
       </div>
 
       <div class="info-panel" id="info-specs">
-        <table class="specs-table">
-          <tr><td>Matière principale</td><td>Cuir pleine fleur tanné végétal</td></tr>
-          <tr><td>Taille de siège</td><td>16.5″, 17″, 17.5″, 18″</td></tr>
-          <tr><td>Largeur de garrot</td><td>Moyen (MW), Large (W), Très large (XW)</td></tr>
-          <tr><td>Couleur</td><td>Havane, Noir, Brun foncé</td></tr>
-          <tr><td>Poids</td><td>5,8 kg</td></tr>
-          <tr><td>Conforme CE</td><td>Oui — EN 15621:2011</td></tr>
-          <tr><td>Délai de livraison</td><td>5–10 jours ouvrés</td></tr>
-          <tr><td>Garantie</td><td>24 mois pièces et main d'œuvre</td></tr>
-          <tr><td>Référence</td><td>EQP-DRS-001-HV</td></tr>
+        <table class="specs-table" id="specs-table">
+          <tr><td colspan="2" style="color:var(--muted);font-size:13px;">Aucune caractéristique renseignée.</td></tr>
         </table>
       </div>
 
@@ -537,7 +563,8 @@
 
       <div class="cta-row">
         <button class="btn btn-primary btn-lg" id="btn-contact" style="flex:1" onclick="contacterVendeur()">💬 Contacter le vendeur</button>
-        <button class="btn btn-outline btn-lg" style="min-width:46px;padding:14px;">🤍</button>
+        <a class="btn btn-ghost btn-lg" id="btn-modifier" style="display:none;" href="#">✏️ Modifier</a>
+        <button class="btn btn-outline btn-lg" id="btn-fav" style="min-width:46px;padding:14px;" onclick="toggleFavori()">🤍</button>
       </div>
     </div>
 
@@ -545,7 +572,7 @@
     <div class="seller-card">
       <div class="seller-avatar">🏪</div>
       <div class="seller-info">
-        <div class="seller-name" id="p-seller-name"></div>
+        <a class="seller-name" id="p-seller-name" href="#" style="color:inherit;text-decoration:none;"></a>
         <div class="seller-meta" id="p-seller-region"></div>
       </div>
       <a href="#" class="btn btn-ghost btn-sm" id="btn-seller-contact">Contacter</a>
@@ -560,77 +587,29 @@
     </div>
 
     <!-- ASK QUESTION -->
-    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.2rem;">
+    <div id="ask-block" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.2rem;">
       <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">❓ Une question sur ce produit ?</div>
       <div style="display:flex;gap:8px;">
-        <input type="text" placeholder="Ex : Disponible en taille 18 pouces noir ?" style="font-size:13px;">
-        <button class="btn btn-ghost btn-sm" style="flex-shrink:0;">Envoyer</button>
+        <input type="text" id="ask-input" placeholder="Ex : Disponible en taille 18 pouces noir ?" style="font-size:13px;" onkeydown="if(event.key==='Enter') envoyerQuestion()">
+        <button class="btn btn-ghost btn-sm" style="flex-shrink:0;" onclick="envoyerQuestion()">Envoyer</button>
       </div>
+      <div id="ask-confirm" style="display:none;font-size:12px;color:var(--green);margin-top:6px;">Message envoyé au vendeur ✓</div>
     </div>
 
   </div>
 </div>
 
 <!-- SIMILAR PRODUCTS -->
-<div class="similar-section">
-  <div class="similar-title">Produits similaires</div>
-  <div class="similar-grid">
-
-    <a class="product-card" href="product.html">
-      <div class="product-img" style="font-size:2rem;"><span>🏇</span>
-        <div class="product-badge-wrap"><span class="badge badge-green">Neuf</span></div>
-      </div>
-      <div class="product-body">
-        <div class="product-meta">Sellerie</div>
-        <div class="product-name">Selle CSO jumping cuir bulle</div>
-        <div class="product-price">980 € <span class="product-price-unit">HT</span></div>
-        <div class="product-seller">🏪 EquiPro </div>
-      </div>
-    </a>
-
-    <a class="product-card" href="product.html">
-      <div class="product-img" style="background:var(--brown-pale);font-size:2rem;"><span>🧵</span>
-        <div class="product-badge-wrap"><span class="badge badge-green">Neuf</span></div>
-      </div>
-      <div class="product-body">
-        <div class="product-meta">Sellerie</div>
-        <div class="product-name">Sous-selle feutrine naturelle 50×50 cm</div>
-        <div class="product-price">45 € <span class="product-price-unit">HT</span></div>
-        <div class="product-seller">🏪 Sellerie du Sud </div>
-      </div>
-    </a>
-
-    <a class="product-card" href="product.html">
-      <div class="product-img" style="background:var(--green-pale);font-size:2rem;"><span>🔗</span>
-        <div class="product-badge-wrap"><span class="badge badge-gray">Occasion</span></div>
-      </div>
-      <div class="product-body">
-        <div class="product-meta">Sellerie</div>
-        <div class="product-name">Étriers légers inox réglables — paire</div>
-        <div class="product-price">62 € <span class="product-price-unit">HT</span></div>
-        <div class="product-seller">🏪 HorseGear Pro </div>
-      </div>
-    </a>
-
-    <a class="product-card" href="product.html">
-      <div class="product-img" style="background:#f5f0ea;font-size:2rem;"><span>🧴</span>
-        <div class="product-badge-wrap"><span class="badge badge-green">Neuf</span></div>
-      </div>
-      <div class="product-body">
-        <div class="product-meta">Entretien</div>
-        <div class="product-name">Crème nourrissante cuir selle 500 ml</div>
-        <div class="product-price">18 € <span class="product-price-unit">HT</span></div>
-        <div class="product-seller">🏪 EquiCare SARL </div>
-      </div>
-    </a>
-
-  </div>
+<div class="similar-section" id="similar-section" style="display:none;">
+  <div class="similar-title" id="similar-title">Produits similaires</div>
+  <div class="similar-grid" id="similar-grid"></div>
 </div>
 
 <script src="auth-guard.js"></script>
 <script>
 (async function() {
   const user = await requireAuth();
+  window._moi = user;
   await initNav(user);
   await loadProduit();
 })();
@@ -645,6 +624,7 @@ async function loadProduit() {
     var p = await res.json();
 
     window._produit = p;
+    chargerSimilaires(p);
 
     // Breadcrumb
     document.querySelector('.breadcrumb-current').textContent = p.titre;
@@ -671,7 +651,9 @@ async function loadProduit() {
       : '<p style="color:var(--muted)">Aucune description fournie.</p>';
 
     // Vendeur
-    document.getElementById('p-seller-name').textContent = p.raison_sociale;
+    var sellerLink = document.getElementById('p-seller-name');
+    sellerLink.textContent = p.raison_sociale;
+    sellerLink.href = 'profil-vendeur.html?id=' + p.seller_id;
     document.getElementById('p-seller-region').textContent = p.seller_region || p.region || '';
 
     // Badge état
@@ -702,12 +684,89 @@ async function loadProduit() {
       thumbs.innerHTML = '<div class="gallery-thumb active" style="font-size:1.5rem;">🏇</div>';
     }
 
+    // État favori
+    try {
+      var favRes = await fetch(API + '/favoris/ids', { credentials: 'include' });
+      var favIds = await favRes.json();
+      if (favIds.map(String).includes(String(p.id))) {
+        document.getElementById('btn-fav').textContent = '❤️';
+      }
+    } catch(e) {}
+
+    // Boutons propriétaire vs visiteur
+    if (window._moi && window._moi.id === p.seller_id) {
+      document.getElementById('btn-contact').style.display  = 'none';
+      document.getElementById('ask-block').style.display    = 'none';
+      var btnModifier = document.getElementById('btn-modifier');
+      btnModifier.style.display = '';
+      btnModifier.href = 'publier.html?edit=' + p.id;
+    }
+
+    // Caractéristiques
+    var carac = null;
+    try { carac = p.caracteristiques ? (typeof p.caracteristiques === 'string' ? JSON.parse(p.caracteristiques) : p.caracteristiques) : null; } catch(e) {}
+    var specsTable = document.getElementById('specs-table');
+    if (carac && Object.keys(carac).length) {
+      specsTable.innerHTML = Object.keys(carac).map(function(k) {
+        return '<tr><td>' + escHtml(k) + '</td><td>' + escHtml(carac[k]) + '</td></tr>';
+      }).join('');
+    }
+
     // Titre de la page
     document.title = p.titre + ' — Kaer Seller';
 
   } catch (err) {
     showErreur('Erreur lors du chargement du produit.');
   }
+}
+
+async function chargerSimilaires(p) {
+  if (!p) return;
+
+  var res, data;
+  try {
+    res  = await fetch(API + '/produits?categorie=' + encodeURIComponent(p.categorie) + '&sort=recent', { credentials: 'include' });
+    data = await res.json();
+    // exclure le produit courant
+    data = data.filter(function(x) { return x.id !== p.id; }).slice(0, 4);
+
+    // si aucun dans la même catégorie, on prend n'importe quoi
+    if (!data.length) {
+      res  = await fetch(API + '/produits?sort=recent', { credentials: 'include' });
+      data = await res.json();
+      data = data.filter(function(x) { return x.id !== p.id; }).slice(0, 4);
+      document.getElementById('similar-title').textContent = 'Autres annonces';
+    }
+
+    if (!data.length) return;
+
+    var badgeClass = { neuf: 'badge-green', occasion: 'badge-gray', reconditionne: 'badge-brown' };
+    var badgeLabel = { neuf: 'Neuf', occasion: 'Occasion', reconditionne: 'Reconditionné' };
+
+    document.getElementById('similar-grid').innerHTML = data.map(function(x) {
+      console.log('produit similaire', x.id, 'images:', x.images);
+      var imgs = [];
+      try { imgs = x.images ? (Array.isArray(x.images) ? x.images : JSON.parse(x.images)) : []; } catch(e) { console.log('parse error', e); }
+      var imgHtml = imgs.length
+        ? '<img src="/uploads/' + imgs[0] + '" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">'
+        : '<span>🏇</span>';
+      var prix = x.prix_ht
+        ? parseFloat(x.prix_ht).toLocaleString('fr-FR') + ' € <span class="product-price-unit">HT</span>'
+        : 'Sur devis';
+      return '<a class="product-card" href="product.html?id=' + x.id + '">'
+        + '<div class="product-img">' + imgHtml
+        + '<div class="product-badge-wrap"><span class="badge ' + (badgeClass[x.etat] || 'badge-gray') + '">' + (badgeLabel[x.etat] || x.etat) + '</span></div>'
+        + '</div>'
+        + '<div class="product-body">'
+        + '<div class="product-meta">' + escHtml(x.categorie) + '</div>'
+        + '<div class="product-name">' + escHtml(x.titre) + '</div>'
+        + '<div class="product-price">' + prix + '</div>'
+        + '<div class="product-seller">🏪 ' + escHtml(x.raison_sociale) + '</div>'
+        + '</div></a>';
+    }).join('');
+
+    document.getElementById('similar-section').style.display = '';
+  } catch (err) { console.error('chargerSimilaires:', err); }
 }
 
 function changerPhoto(filename, thumbEl) {
@@ -721,6 +780,42 @@ function contacterVendeur() {
   if (!window._produit) return;
   var p = window._produit;
   window.location.href = 'messages.html?to=' + p.seller_id + '&produit=' + p.id;
+}
+
+async function envoyerQuestion() {
+  var p       = window._produit;
+  var input   = document.getElementById('ask-input');
+  var confirm = document.getElementById('ask-confirm');
+  if (!p || !input.value.trim()) return;
+
+  try {
+    var res = await fetch(API + '/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ to_id: p.seller_id, contenu: input.value.trim(), produit_id: p.id }),
+    });
+    if (res.ok) {
+      input.value = '';
+      confirm.style.display = 'block';
+      setTimeout(function() { confirm.style.display = 'none'; }, 3000);
+    }
+  } catch(e) {}
+}
+
+async function toggleFavori() {
+  var p   = window._produit;
+  var btn = document.getElementById('btn-fav');
+  if (!p || !btn) return;
+  try {
+    var res  = await fetch(API + '/favoris/' + p.id, { method: 'POST', credentials: 'include' });
+    var data = await res.json();
+    btn.textContent = data.favori ? '❤️' : '🤍';
+  } catch(e) {}
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 function showErreur(msg) {

@@ -28,9 +28,11 @@ app.use(express.static(require('path').join(__dirname, '..')));
 app.use('/uploads', express.static(require('path').join(__dirname, '..', 'uploads')));
 
 app.use('/api/auth',    require('./routes/auth'));
-// à venir :
 app.use('/api/produits', require('./routes/produits'));
 app.use('/api/messages', require('./routes/messages'));
+app.use('/api/users',   require('./routes/users'));
+app.use('/api/avis',    require('./routes/avis'));
+app.use('/api/favoris', require('./routes/favoris'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 

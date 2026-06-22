@@ -85,6 +85,40 @@ router.post('/logout', (req, res) => {
   res.json({ message: 'Déconnecté' });
 });
 
+// GET /api/auth/profile — données complètes du profil connecté
+router.get('/profile', require('../middleware/auth'), async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      'SELECT id, raison_sociale, siret, email, region, prenom, nom, date_naissance, telephone, ville, bio, created_at FROM users WHERE id = ?',
+      [req.user.id]
+    );
+    if (!rows[0]) return res.status(404).json({ error: 'Utilisateur introuvable' });
+    const [stats] = await db.query(
+      'SELECT COUNT(*) AS nb_annonces FROM produits WHERE seller_id = ?',
+      [req.user.id]
+    );
+    res.json({ ...rows[0], nb_annonces: stats[0].nb_annonces });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// PATCH /api/auth/profile — modifier les infos personnelles
+router.patch('/profile', require('../middleware/auth'), async (req, res) => {
+  const { prenom, nom, date_naissance, telephone, ville, bio, region } = req.body;
+  try {
+    await db.query(
+      'UPDATE users SET prenom = ?, nom = ?, date_naissance = ?, telephone = ?, ville = ?, bio = ?, region = ? WHERE id = ?',
+      [prenom || null, nom || null, date_naissance || null, telephone || null, ville || null, bio || null, region || null, req.user.id]
+    );
+    res.json({ message: 'Profil mis à jour' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 // GET /api/auth/me — vérifie si la session est active
 router.get('/me', (req, res) => {
   const token = req.cookies?.token;

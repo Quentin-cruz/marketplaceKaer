@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mes favoris — Kaer Seller</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.page-header {
+  background: var(--green);
+  padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 4vw, 3rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.page-header h1 { font-family: var(--font-serif); font-size: clamp(1.4rem, 3vw, 2rem); color: #fff; margin-bottom: 0.3rem; }
+.page-header p  { font-size: 14px; color: rgba(255,255,255,.65); }
+
+.favoris-body {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 4vw, 2rem);
+}
+
+.favoris-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.2rem;
+}
+
+.product-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.product-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+
+.product-img {
+  aspect-ratio: 4/3;
+  background: var(--surface2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  overflow: hidden;
+  position: relative;
+}
+.product-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.product-badge-wrap { position: absolute; top: 8px; left: 8px; }
+
+.product-body { padding: 0.9rem; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.product-meta { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.product-name { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.4; }
+.product-price { font-family: var(--font-serif); font-size: 1rem; color: var(--brown); font-weight: 700; margin-top: 4px; }
+.product-price-unit { font-size: 0.7em; font-family: var(--font-sans); font-weight: 400; color: var(--muted); }
+.product-seller { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+.empty-state-icon  { font-size: 3rem; margin-bottom: 1rem; }
+.empty-state-title { font-size: 16px; font-weight: 500; color: var(--text2); margin-bottom: 0.5rem; }
+.empty-state-text  { font-size: 13px; margin-bottom: 1.5rem; }
+
+@media (max-width: 600px) {
+  .favoris-grid { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
+}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="navbar-logo" href="marketplace.html">
+    <span class="navbar-logo-icon">⬡</span>
+    Kaer Seller
+  </a>
+  <div class="navbar-nav">
+    <a class="nav-link" href="marketplace.html">Catalogue</a>
+    <a class="nav-link" href="mes-achats.html">Mes achats</a>
+    <a class="nav-link" href="mes-annonces.html">Mes annonces</a>
+    <span class="nav-link-wrap"><a class="nav-link" href="messages.html">Messages</a><span class="nav-badge" id="msg-badge"></span></span>
+  </div>
+  <div class="navbar-actions">
+    <div class="navbar-search">
+      <svg class="navbar-search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8.5" cy="8.5" r="5.5"/><line x1="13" y1="13" x2="18" y2="18"/></svg>
+      <input type="search" placeholder="Rechercher un produit…">
+    </div>
+    <div class="avatar-wrap">
+      <div class="avatar" id="nav-avatar" onclick="toggleDropdown()" style="cursor:pointer"></div>
+      <div class="avatar-dropdown" id="avatar-dropdown">
+        <div class="avatar-dropdown-header">
+          <span class="avatar-dropdown-name" id="dd-name"></span>
+          <span class="avatar-dropdown-email" id="dd-email"></span>
+        </div>
+        <a class="avatar-dropdown-item" href="profil.html">👤 Mon profil</a>
+        <a class="avatar-dropdown-item" href="mes-annonces.html">📋 Mes annonces</a>
+        <a class="avatar-dropdown-item active" href="favoris.html">🤍 Favoris</a>
+        <div class="avatar-dropdown-sep"></div>
+        <button class="avatar-dropdown-item danger" onclick="logout()">↩ Se déconnecter</button>
+      </div>
+    </div>
+  </div>
+  <button class="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-nav" id="mobile-nav">
+  <a class="nav-link" href="marketplace.html">Catalogue</a>
+  <a class="nav-link" href="mes-achats.html">Mes achats</a>
+  <a class="nav-link" href="mes-annonces.html">Mes annonces</a>
+  <a class="nav-link" href="messages.html">Messages</a>
+</div>
+
+<div class="page-header">
+  <div>
+    <h1>Mes favoris</h1>
+    <p id="header-count">Chargement…</p>
+  </div>
+  <a href="marketplace.html" class="btn btn-primary">Parcourir le catalogue</a>
+</div>
+
+<div class="favoris-body">
+  <div id="favoris-grid"></div>
+</div>
+
+<script src="auth-guard.js"></script>
+<script>
+(async function() {
+  var user = await requireAuth();
+  await initNav(user);
+  await chargerFavoris();
+})();
+
+function toggleMobileNav() {
+  document.getElementById('mobile-nav').classList.toggle('open');
+}
+
+function badgeEtat(etat) {
+  var map = { neuf: ['badge-green','Neuf'], occasion: ['badge-gray','Occasion'], reconditionne: ['badge-brown','Reconditionné'] };
+  var b = map[etat] || ['badge-gray', etat];
+  return '<span class="badge ' + b[0] + '">' + b[1] + '</span>';
+}
+
+async function chargerFavoris() {
+  var grid  = document.getElementById('favoris-grid');
+  var count = document.getElementById('header-count');
+  try {
+    var res  = await fetch(API + '/favoris', { credentials: 'include' });
+    var data = await res.json();
+
+    count.textContent = data.length + ' annonce' + (data.length > 1 ? 's' : '') + ' en favori' + (data.length > 1 ? 's' : '');
+
+    if (!data.length) {
+      grid.innerHTML = '<div class="empty-state">'
+        + '<div class="empty-state-icon">🤍</div>'
+        + '<div class="empty-state-title">Aucun favori pour l\'instant</div>'
+        + '<div class="empty-state-text">Ajoutez des annonces à vos favoris depuis le catalogue.</div>'
+        + '<a href="marketplace.html" class="btn btn-primary">Parcourir le catalogue</a>'
+        + '</div>';
+      return;
+    }
+
+    grid.className = 'favoris-grid';
+    grid.innerHTML = data.map(function(p) {
+      var imgs = [];
+      try { imgs = p.images ? (Array.isArray(p.images) ? p.images : JSON.parse(p.images)) : []; } catch(e) {}
+      var imgHtml = imgs.length
+        ? '<img src="/uploads/' + imgs[0] + '" alt="">'
+        : '<span>🏇</span>';
+      var prix = p.prix_ht
+        ? parseFloat(p.prix_ht).toLocaleString('fr-FR') + ' € <span class="product-price-unit">HT</span>'
+        : 'Sur devis';
+      return '<a class="product-card" href="product.html?id=' + p.id + '">'
+        + '<div class="product-img">' + imgHtml
+        + '<div class="product-badge-wrap">' + badgeEtat(p.etat) + '</div>'
+        + '</div>'
+        + '<div class="product-body">'
+        + '<div class="product-meta">' + escHtml(p.categorie) + '</div>'
+        + '<div class="product-name">' + escHtml(p.titre) + '</div>'
+        + '<div class="product-price">' + prix + '</div>'
+        + '<div class="product-seller">🏪 ' + escHtml(p.raison_sociale) + '</div>'
+        + '</div></a>';
+    }).join('');
+  } catch {
+    grid.innerHTML = '<div style="text-align:center;padding:3rem;color:#b91c1c;">Erreur de chargement.</div>';
+  }
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

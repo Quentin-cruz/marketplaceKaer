@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Publier une annonce — Kaer Seller</title>
+<title>Annonce — Kaer Seller</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <style>
@@ -214,8 +214,9 @@ textarea {
           <span class="avatar-dropdown-name" id="dd-name"></span>
           <span class="avatar-dropdown-email" id="dd-email"></span>
         </div>
-        <a class="avatar-dropdown-item" href="#">👤 Mon profil</a>
-        <a class="avatar-dropdown-item" href="#">📋 Mes annonces</a>
+        <a class="avatar-dropdown-item" href="profil.html">👤 Mon profil</a>
+        <a class="avatar-dropdown-item" href="mes-annonces.html">📋 Mes annonces</a>
+        <a class="avatar-dropdown-item" href="favoris.html">🤍 Favoris</a>
         <div class="avatar-dropdown-sep"></div>
         <button class="avatar-dropdown-item danger" onclick="logout()">↩ Se déconnecter</button>
       </div>
@@ -238,8 +239,8 @@ textarea {
 <div class="publish-page">
 
   <div class="publish-header">
-    <h1>Publier une annonce</h1>
-    <p>Votre annonce sera visible par tous les professionnels inscrits sur Kaer Seller.</p>
+    <h1 id="publish-title">Publier une annonce</h1>
+    <p id="publish-subtitle">Votre annonce sera visible par tous les professionnels inscrits sur Kaer Seller.</p>
   </div>
 
   <div id="publish-error" class="form-error" style="display:none;margin-bottom:1.2rem;"></div>
@@ -297,6 +298,12 @@ textarea {
     <div class="upload-previews" id="upload-previews"></div>
   </div>
 
+  <!-- CARACTÉRISTIQUES -->
+  <div class="form-section" id="carac-section" style="display:none;">
+    <div class="form-section-title">Caractéristiques</div>
+    <div id="carac-fields"></div>
+  </div>
+
   <!-- ÉTAT & PRIX -->
   <div class="form-section">
     <div class="form-section-title">État & prix</div>
@@ -330,6 +337,7 @@ textarea {
   <div class="publish-footer">
     <a href="marketplace.html" class="btn btn-ghost">Annuler</a>
     <button class="btn btn-primary btn-lg" id="btn-publier" onclick="publier()">Publier l'annonce</button>
+    <input type="hidden" id="edit-id" value="">
   </div>
 
 </div>
@@ -342,10 +350,136 @@ var selectedFiles = [];
   const user = await requireAuth();
   await initNav(user);
   initUpload();
+
+  document.getElementById('f-categorie').addEventListener('change', function() {
+    renderCaracFields(this.value, null);
+  });
+
+  var editId = new URLSearchParams(window.location.search).get('edit');
+  if (editId) {
+    document.getElementById('edit-id').value = editId;
+    document.getElementById('publish-title').textContent    = 'Modifier l\'annonce';
+    document.getElementById('publish-subtitle').textContent = 'Les modifications seront visibles immédiatement.';
+    document.getElementById('btn-publier').textContent      = 'Enregistrer les modifications';
+    await chargerPourEdition(editId);
+  }
 })();
+
+async function chargerPourEdition(id) {
+  try {
+    var res = await fetch(API + '/produits/' + id, { credentials: 'include' });
+    var p   = await res.json();
+
+    document.getElementById('f-titre').value       = p.titre       || '';
+    document.getElementById('f-categorie').value   = p.categorie   || '';
+    document.getElementById('f-region').value      = p.region      || '';
+    document.getElementById('f-description').value = p.description || '';
+    document.getElementById('f-prix').value        = p.prix_ht     || '';
+
+    var etatRadio = document.querySelector('input[name="etat"][value="' + p.etat + '"]');
+    if (etatRadio) etatRadio.checked = true;
+
+    // Caractéristiques
+    var carac = null;
+    try { carac = p.caracteristiques ? (typeof p.caracteristiques === 'string' ? JSON.parse(p.caracteristiques) : p.caracteristiques) : null; } catch(e) {}
+    if (p.categorie) renderCaracFields(p.categorie, carac);
+
+    // Afficher les photos existantes
+    var imgs = [];
+    try { imgs = p.images ? JSON.parse(p.images) : []; } catch(e) {}
+    if (imgs.length) {
+      var container = document.getElementById('upload-previews');
+      container.innerHTML = imgs.map(function(f, i) {
+        return '<div class="upload-preview-item" id="existing-' + i + '">'
+          + '<img src="/uploads/' + f + '" alt="">'
+          + '<button class="upload-preview-remove" onclick="retirerExistante(\'' + f + '\', ' + i + ')">×</button>'
+          + '</div>';
+      }).join('');
+      window._existingImages = imgs;
+      if (imgs.length >= 5) document.getElementById('upload-zone').style.display = 'none';
+    }
+  } catch {
+    showError('Impossible de charger l\'annonce.');
+  }
+}
 
 function toggleMobileNav() {
   document.getElementById('mobile-nav').classList.toggle('open');
+}
+
+var CARAC_FIELDS = {
+  'Sellerie': [
+    { key: 'Type',          type: 'select', options: ['Selle dressage','Selle CSO','Selle endurance','Selle western','Filet','Licol','Autres'] },
+    { key: 'Taille siège',  type: 'text',   placeholder: 'ex : 17"' },
+    { key: 'Largeur arçon', type: 'select', options: ['Étroit','Normal','Large','Très large'] },
+    { key: 'Matière',       type: 'select', options: ['Cuir','Synthétique','Mixte'] },
+    { key: 'Marque',        type: 'text',   placeholder: 'ex : Pessoa, Devoucoux…' },
+  ],
+  'Équipement cheval': [
+    { key: 'Type',     type: 'select', options: ['Protège-boulets','Guêtres','Bonnets','Couverture','Tapis','Filet','Licol','Chambrière','Autres'] },
+    { key: 'Taille',   type: 'select', options: ['XS','S','M','L','XL','XXL','Poney','Cheval','Grand cheval'] },
+    { key: 'Matière',  type: 'select', options: ['Cuir','Nylon','Néoprène','Polaire','Coton','Autres'] },
+    { key: 'Marque',   type: 'text',   placeholder: 'ex : Eskadron, HKM…' },
+  ],
+  'Matériel d\'écurie': [
+    { key: 'Type',       type: 'select', options: ['Abreuvoir','Mangeoire','Râtelier','Fourche','Balai','Box','Clôture','Autres'] },
+    { key: 'Dimensions', type: 'text',   placeholder: 'ex : 120 × 80 cm' },
+    { key: 'Matière',    type: 'select', options: ['Plastique','Métal','Bois','Caoutchouc','Autres'] },
+    { key: 'Marque',     type: 'text',   placeholder: 'Marque éventuelle' },
+  ],
+  'Vêtements équitation': [
+    { key: 'Type',   type: 'select', options: ['Casque / Bombe','Gilet airbag','Pantalon','Jodhpur','Veste','Botte','Paddock','Gant','T-shirt','Polaire','Autres'] },
+    { key: 'Taille', type: 'text',   placeholder: 'ex : 38, M, 42…' },
+    { key: 'Genre',  type: 'select', options: ['Femme','Homme','Enfant','Mixte'] },
+    { key: 'Marque', type: 'text',   placeholder: 'ex : Pikeur, Cavalleria…' },
+  ],
+  'Soins & santé': [
+    { key: 'Type',       type: 'select', options: ['Shampoing','Soin musculaire','Pansement','Complément articulaire','Vermifuge','Désinfectant','Autres'] },
+    { key: 'Contenance', type: 'text',   placeholder: 'ex : 500 ml, 1 kg…' },
+    { key: 'Marque',     type: 'text',   placeholder: 'ex : Farnam, NAF…' },
+  ],
+  'Alimentation': [
+    { key: 'Type',            type: 'select', options: ['Foin','Paille','Granulés','Mash','Complément','Sel','Avoine','Autres'] },
+    { key: 'Poids / Quantité',type: 'text',   placeholder: 'ex : 25 kg, 500 kg…' },
+    { key: 'Marque',          type: 'text',   placeholder: 'Marque éventuelle' },
+  ],
+  'Accessoires': [
+    { key: 'Type',    type: 'select', options: ['Cravache','Éperons','Sac de selle','Tapis de selle','Brosse','Cure-pied','Autres'] },
+    { key: 'Matière', type: 'select', options: ['Cuir','Synthétique','Textile','Métal','Autres'] },
+    { key: 'Marque',  type: 'text',   placeholder: 'Marque éventuelle' },
+  ],
+};
+
+function renderCaracFields(categorie, valeurs) {
+  var section = document.getElementById('carac-section');
+  var container = document.getElementById('carac-fields');
+  var fields = CARAC_FIELDS[categorie];
+  if (!fields) { section.style.display = 'none'; container.innerHTML = ''; return; }
+
+  container.innerHTML = fields.map(function(f) {
+    var id  = 'carac-' + f.key.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+    var val = valeurs && valeurs[f.key] ? valeurs[f.key] : '';
+    var input = f.type === 'select'
+      ? '<select id="' + id + '"><option value="">—</option>'
+        + f.options.map(function(o) { return '<option value="' + o + '"' + (val === o ? ' selected' : '') + '>' + o + '</option>'; }).join('')
+        + '</select>'
+      : '<input type="text" id="' + id + '" placeholder="' + (f.placeholder || '') + '" value="' + val + '">';
+    return '<div class="form-group"><label>' + f.key + '</label>' + input + '</div>';
+  }).join('');
+
+  section.style.display = '';
+}
+
+function collectCarac(categorie) {
+  var fields = CARAC_FIELDS[categorie];
+  if (!fields) return null;
+  var obj = {};
+  fields.forEach(function(f) {
+    var id  = 'carac-' + f.key.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+    var el  = document.getElementById(id);
+    if (el && el.value) obj[f.key] = el.value;
+  });
+  return Object.keys(obj).length ? JSON.stringify(obj) : null;
 }
 
 function initUpload() {
@@ -400,10 +534,19 @@ function retirerPhoto(i) {
   renderPreviews();
 }
 
+function retirerExistante(filename, i) {
+  window._existingImages = (window._existingImages || []).filter(function(f) { return f !== filename; });
+  var el = document.getElementById('existing-' + i);
+  if (el) el.remove();
+  if ((window._existingImages.length + selectedFiles.length) < 5)
+    document.getElementById('upload-zone').style.display = '';
+}
+
 async function publier() {
   var error = document.getElementById('publish-error');
   error.style.display = 'none';
 
+  var editId      = document.getElementById('edit-id').value;
   var titre       = document.getElementById('f-titre').value.trim();
   var categorie   = document.getElementById('f-categorie').value;
   var region      = document.getElementById('f-region').value || '';
@@ -416,7 +559,7 @@ async function publier() {
 
   var btn = document.getElementById('btn-publier');
   btn.disabled = true;
-  btn.textContent = 'Publication…';
+  btn.textContent = editId ? 'Enregistrement…' : 'Publication…';
 
   try {
     var fd = new FormData();
@@ -426,17 +569,24 @@ async function publier() {
     fd.append('description', description);
     fd.append('etat',        etat);
     if (prixRaw) fd.append('prix_ht', prixRaw);
+    var carac = collectCarac(categorie);
+    if (carac) fd.append('caracteristiques', carac);
+    // photos existantes conservées
+    (window._existingImages || []).forEach(function(f) { fd.append('existingImages[]', f); });
+    // nouvelles photos
     selectedFiles.forEach(function(f) { fd.append('images', f); });
 
-    var res  = await fetch(API + '/produits', { method: 'POST', credentials: 'include', body: fd });
-    var data = await res.json();
-    if (!res.ok) return showError(data.error || 'Erreur lors de la publication.');
+    var url    = editId ? API + '/produits/' + editId : API + '/produits';
+    var method = editId ? 'PUT' : 'POST';
+    var res    = await fetch(url, { method: method, credentials: 'include', body: fd });
+    var data   = await res.json();
+    if (!res.ok) return showError(data.error || 'Erreur.');
     window.location.href = 'product.html?id=' + data.id;
   } catch {
     showError('Impossible de contacter le serveur.');
   } finally {
     btn.disabled = false;
-    btn.textContent = "Publier l'annonce";
+    btn.textContent = editId ? 'Enregistrer les modifications' : "Publier l'annonce";
   }
 }
 
