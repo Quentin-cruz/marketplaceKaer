@@ -316,9 +316,10 @@ h1, h2, h3 { font-family: var(--font-serif); line-height: 1.2; }
   font-weight: 500;
   letter-spacing: 0.03em;
 }
-.badge-green { background: var(--green-pale); color: var(--green); }
-.badge-brown { background: var(--brown-pale); color: var(--brown); }
-.badge-gray  { background: var(--surface3); color: var(--muted); }
+.badge-green  { background: var(--green-pale); color: var(--green); }
+.badge-brown  { background: var(--brown-pale); color: var(--brown); }
+.badge-gray   { background: var(--surface3); color: var(--muted); }
+.badge-vendu  { background: #1e293b; color: #f8fafc; }
 
 /* ===== INPUTS ===== */
 .form-group { margin-bottom: 1rem; }

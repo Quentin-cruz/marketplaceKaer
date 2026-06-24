@@ -140,6 +140,18 @@
 .modal p { font-size: 14px; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.6; }
 .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
 
+.badge-vendu {
+  display: inline-block;
+  background: #e2e8f0;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 @media (max-width: 600px) {
   .annonce-item { grid-template-columns: 80px 1fr; }
   .annonce-actions { grid-column: 1/-1; flex-direction: row; border-left: none; border-top: 1px solid var(--border); padding: 0.8rem 1rem; }
@@ -208,7 +220,26 @@
 
 <!-- CONTENU -->
 <div class="annonces-body">
-  <div id="annonces-list"></div>
+  <div id="section-actives"></div>
+  <div id="section-vendues"></div>
+</div>
+
+<!-- MODAL VENTE -->
+<div class="modal-overlay" id="modal-vente">
+  <div class="modal">
+    <h3>Marquer comme vendue</h3>
+    <p>Sélectionnez l'acheteur parmi les personnes qui ont contacté le vendeur pour cette annonce.</p>
+    <div class="form-group" id="acheteur-select-wrap">
+      <select id="acheteur-select">
+        <option value="">Chargement…</option>
+      </select>
+    </div>
+    <div id="vente-error" class="form-error" style="display:none;margin-bottom:0.8rem;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="fermerModalVente()">Annuler</button>
+      <button class="btn btn-primary" onclick="confirmerVente()">Confirmer la vente</button>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL SUPPRESSION -->
@@ -226,6 +257,7 @@
 <script src="auth-guard.js"></script>
 <script>
 var idASupprimer = null;
+var idAVendre    = null;
 
 (async function() {
   const user = await requireAuth();
@@ -244,16 +276,18 @@ function badgeEtat(etat) {
 }
 
 async function chargerAnnonces() {
-  var liste = document.getElementById('annonces-list');
   try {
     var res  = await fetch(API + '/produits/moi', { credentials: 'include' });
     var data = await res.json();
 
+    var actives = data.filter(function(p) { return !p.vendu; });
+    var vendues = data.filter(function(p) { return p.vendu; });
+
     var count = document.getElementById('header-count');
-    count.textContent = data.length + ' annonce' + (data.length > 1 ? 's' : '') + ' publiée' + (data.length > 1 ? 's' : '');
+    count.textContent = actives.length + ' en ligne · ' + vendues.length + ' vendue' + (vendues.length > 1 ? 's' : '');
 
     if (!data.length) {
-      liste.innerHTML = '<div class="empty-state">'
+      document.getElementById('section-actives').innerHTML = '<div class="empty-state">'
         + '<div class="empty-state-icon">📭</div>'
         + '<div class="empty-state-title">Aucune annonce pour l\'instant</div>'
         + '<div class="empty-state-text">Publiez votre première annonce et touchez des milliers de professionnels.</div>'
@@ -262,7 +296,7 @@ async function chargerAnnonces() {
       return;
     }
 
-    liste.innerHTML = data.map(function(p) {
+    function renderItem(p) {
       var prix = p.prix_ht
         ? parseFloat(p.prix_ht).toLocaleString('fr-FR') + ' € HT'
         : 'Sur devis';
@@ -271,23 +305,44 @@ async function chargerAnnonces() {
       var imgHtml = imgs.length
         ? '<img src="/uploads/' + imgs[0] + '" alt="" style="width:100%;height:100%;object-fit:cover;">'
         : '🏇';
-      return '<div class="annonce-item">'
+      var actions = p.vendu
+        ? '<a href="product.html?id=' + p.id + '" class="btn btn-ghost btn-sm">Voir</a>'
+        : '<a href="product.html?id=' + p.id + '" class="btn btn-ghost btn-sm">Voir</a>'
+          + '<a href="publier.html?edit=' + p.id + '" class="btn btn-ghost btn-sm">Modifier</a>'
+          + '<button class="btn btn-sm" style="color:#16a34a;border-color:#86efac;background:transparent;" onclick="demanderVente(' + p.id + ')">Vendu</button>'
+          + '<button class="btn btn-sm" style="color:#c0392b;border-color:#fca5a5;background:transparent;" onclick="demanderSuppr(' + p.id + ')">Supprimer</button>';
+
+      return '<div class="annonce-item" style="' + (p.vendu ? 'opacity:.55;' : '') + '">'
         + '<div class="annonce-img">' + imgHtml + '</div>'
         + '<div class="annonce-info">'
         + '<div class="annonce-titre">' + escHtml(p.titre) + '</div>'
         + '<div class="annonce-meta">' + badgeEtat(p.etat) + '<span>' + escHtml(p.categorie) + '</span>' + (p.region ? '<span>· ' + escHtml(p.region) + '</span>' : '') + '</div>'
         + '<div class="annonce-prix">' + prix + '</div>'
         + '<div class="annonce-date">Publiée le ' + date + '</div>'
+        + (p.vendu && p.acheteur_nom ? '<div class="annonce-date">Vendue à <a href="profil-vendeur.html?id=' + p.acheteur_id + '" style="color:var(--green);text-decoration:none;font-weight:500;">' + escHtml(p.acheteur_nom) + '</a></div>' : '')
         + '</div>'
-        + '<div class="annonce-actions">'
-        + '<a href="product.html?id=' + p.id + '" class="btn btn-ghost btn-sm">Voir</a>'
-        + '<a href="publier.html?edit=' + p.id + '" class="btn btn-ghost btn-sm">Modifier</a>'
-        + '<button class="btn btn-sm" style="color:#c0392b;border-color:#fca5a5;background:transparent;" onclick="demanderSuppr(' + p.id + ')">Supprimer</button>'
-        + '</div>'
+        + '<div class="annonce-actions">' + actions + '</div>'
         + '</div>';
-    }).join('');
+    }
+
+    var sectionTitle = '<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.8rem;padding-bottom:.5rem;border-bottom:1px solid var(--border);">';
+
+    var activesHtml = actives.length
+      ? actives.map(renderItem).join('')
+      : '<div style="font-size:13px;color:var(--muted);padding:1rem 0;">Aucune annonce en ligne.</div>';
+
+    document.getElementById('section-actives').innerHTML =
+      sectionTitle + 'En ligne (' + actives.length + ')</div>' + activesHtml;
+
+    if (vendues.length) {
+      document.getElementById('section-vendues').innerHTML =
+        '<div style="margin-top:2rem;">'
+        + sectionTitle + 'Vendues (' + vendues.length + ')</div>'
+        + vendues.map(renderItem).join('')
+        + '</div>';
+    }
   } catch {
-    liste.innerHTML = '<div style="text-align:center;padding:3rem;color:#b91c1c;">Erreur de chargement.</div>';
+    document.getElementById('section-actives').innerHTML = '<div style="text-align:center;padding:3rem;color:#b91c1c;">Erreur de chargement.</div>';
   }
 }
 
@@ -314,6 +369,67 @@ async function confirmerSuppr() {
     }
   } catch {
     alert('Erreur lors de la suppression.');
+  }
+}
+
+async function demanderVente(id) {
+  idAVendre = id;
+  var select = document.getElementById('acheteur-select');
+  var errEl  = document.getElementById('vente-error');
+  errEl.style.display = 'none';
+  select.innerHTML = '<option value="">Chargement…</option>';
+  document.getElementById('modal-vente').classList.add('open');
+
+  try {
+    var res  = await fetch(API + '/messages/produit/' + id + '/acheteurs', { credentials: 'include' });
+    var data = await res.json();
+    if (!data.length) {
+      select.innerHTML = '<option value="">Aucun contact pour cette annonce</option>';
+    } else {
+      select.innerHTML = '<option value="">Sélectionner un acheteur…</option>'
+        + data.map(function(u) {
+            return '<option value="' + u.id + '">' + escHtml(u.raison_sociale) + '</option>';
+          }).join('');
+    }
+  } catch {
+    select.innerHTML = '<option value="">Erreur de chargement</option>';
+  }
+}
+
+function fermerModalVente() {
+  document.getElementById('modal-vente').classList.remove('open');
+  idAVendre = null;
+}
+
+async function confirmerVente() {
+  var errEl      = document.getElementById('vente-error');
+  var acheteurId = document.getElementById('acheteur-select').value;
+  errEl.style.display = 'none';
+
+  if (!acheteurId) {
+    errEl.textContent   = 'Veuillez sélectionner un acheteur.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  try {
+    var res  = await fetch(API + '/transactions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ produit_id: idAVendre, acheteur_id: parseInt(acheteurId) }),
+    });
+    var data = await res.json();
+    if (!res.ok) {
+      errEl.textContent   = data.error || 'Erreur lors de la vente.';
+      errEl.style.display = 'block';
+      return;
+    }
+    fermerModalVente();
+    await chargerAnnonces();
+  } catch {
+    errEl.textContent   = 'Impossible de contacter le serveur.';
+    errEl.style.display = 'block';
   }
 }
 

@@ -500,7 +500,7 @@
 <div class="market-hero">
   <div class="market-hero-text">
     <h1>Catalogue professionnel</h1>
-    <p>2 847 produits · Vendeurs vérifiés SIRET</p>
+    <p id="hero-count">Chargement…</p>
   </div>
   <div class="market-hero-search">
     <div class="search-wrap">
@@ -528,6 +528,12 @@
       <div class="filter-item" onclick="setCategorie(this, 'Soins & santé')">Soins & santé</div>
       <div class="filter-item" onclick="setCategorie(this, 'Alimentation')">Alimentation</div>
       <div class="filter-item" onclick="setCategorie(this, 'Accessoires')">Accessoires</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Statut</div>
+      <div class="filter-item active" onclick="setStatut(this, 'enligne')">En ligne</div>
+      <div class="filter-item" onclick="setStatut(this, 'vendu')">Vendus</div>
     </div>
 
     <div class="sidebar-section">
@@ -589,12 +595,20 @@
 <script src="auth-guard.js"></script>
 <script>
 var _favorisIds = new Set();
+var _moiId = null;
 
 (async function() {
-  const user = await requireAuth();
+  var user = await requireAuth();
+  _moiId = String(user.id);
   await initNav(user);
   await chargerFavorisIds();
   await loadProduits();
+  fetch(API + '/produits/count', { credentials: 'include' })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      document.getElementById('hero-count').textContent = d.total.toLocaleString('fr-FR') + ' produit' + (d.total > 1 ? 's' : '') + ' en ligne · Vendeurs vérifiés SIRET';
+    })
+    .catch(function() {});
 })();
 
 async function chargerFavorisIds() {
@@ -622,7 +636,13 @@ async function toggleFavori(e, produitId) {
 }
 
 // ===== FILTRES ACTIFS =====
-var activeFilters = { categorie: null, etat: null, region: null, sort: 'recent' };
+var activeFilters = { categorie: null, etat: null, region: null, sort: 'recent', q: null, statut: 'enligne' };
+
+// Pré-remplir depuis l'URL (?q=...)
+(function() {
+  var qParam = new URLSearchParams(window.location.search).get('q');
+  if (qParam) activeFilters.q = qParam;
+})();
 
 function toggleMobileNav() {
   document.getElementById('mobile-nav').classList.toggle('open');
@@ -653,6 +673,13 @@ function toggleRegion(el, value) {
   loadProduits();
 }
 
+function setStatut(el, value) {
+  el.parentElement.querySelectorAll('.filter-item').forEach(function(i) { i.classList.remove('active'); });
+  el.classList.add('active');
+  activeFilters.statut = value;
+  loadProduits();
+}
+
 function setSort(val) {
   activeFilters.sort = val;
   loadProduits();
@@ -678,20 +705,29 @@ function badgeEtat(etat) {
 
 // ===== RENDU D'UNE CARD =====
 function renderCard(p) {
+  var vendu  = p.vendu == 1;
   var prix = p.prix_ht
     ? parseFloat(p.prix_ht).toLocaleString('fr-FR') + ' € <span class="product-price-unit">HT</span>'
     : 'Sur devis';
 
-  var imgs   = p.images ? JSON.parse(p.images) : [];
+  var imgs = p.images ? JSON.parse(p.images) : [];
   var imgHtml = imgs.length
     ? '<img src="/uploads/' + imgs[0] + '" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">'
     : '<span class="product-img-placeholder">🏇</span>';
 
+  var badges = vendu
+    ? '<span class="badge badge-vendu">Vendu</span>'
+    : badgeEtat(p.etat);
+
+  var favBtn = (!vendu && _moiId !== String(p.seller_id))
+    ? '<div class="product-fav" id="fav-' + p.id + '" onclick="toggleFavori(event,' + p.id + ')">' + (_favorisIds.has(String(p.id)) ? '❤️' : '🤍') + '</div>'
+    : '';
+
   return '<a class="product-card" href="product.html?id=' + p.id + '">'
     + '<div class="product-img">'
     + imgHtml
-    + '<div class="product-badge-wrap">' + badgeEtat(p.etat) + '</div>'
-    + '<div class="product-fav" id="fav-' + p.id + '" onclick="toggleFavori(event,' + p.id + ')">' + (_favorisIds.has(String(p.id)) ? '❤️' : '🤍') + '</div>'
+    + '<div class="product-badge-wrap">' + badges + '</div>'
+    + favBtn
     + '</div>'
     + '<div class="product-body">'
     + '<div class="product-meta">' + p.categorie + '</div>'
@@ -715,10 +751,15 @@ async function loadProduits() {
   if (activeFilters.categorie) params.set('categorie', activeFilters.categorie);
   if (activeFilters.etat)      params.set('etat',      activeFilters.etat);
   if (activeFilters.region)    params.set('region',    activeFilters.region);
+  if (activeFilters.statut)    params.set('statut',    activeFilters.statut);
   params.set('sort', activeFilters.sort);
 
   var searchVal = document.getElementById('search-input');
-  if (searchVal && searchVal.value.trim()) params.set('q', searchVal.value.trim());
+  var q = (searchVal && searchVal.value.trim()) || activeFilters.q || '';
+  if (q) {
+    params.set('q', q);
+    if (searchVal && !searchVal.value.trim()) searchVal.value = q; // pré-remplit le champ catalogue
+  }
 
   try {
     var res  = await fetch(API + '/produits?' + params.toString(), { credentials: 'include' });

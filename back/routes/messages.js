@@ -19,7 +19,7 @@ router.get('/unread', async (req, res) => {
   }
 });
 
-// GET /api/messages — liste des conversations (un thread par interlocuteur)
+// GET /api/messages — liste des conversations (un thread par interlocuteur + annonce)
 router.get('/', async (req, res) => {
   const moi = req.user.id;
   try {
@@ -28,19 +28,22 @@ router.get('/', async (req, res) => {
         m.*,
         u.raison_sociale,
         p.titre AS produit_titre,
+        p.vendu AS produit_vendu,
         (SELECT COUNT(*) FROM messages m2
-          WHERE m2.from_id = autre.id AND m2.to_id = ? AND m2.lu = 0
+          WHERE m2.from_id = conv.autre_id AND m2.to_id = ?
+            AND m2.lu = 0
+            AND (conv.produit_id IS NULL AND m2.produit_id IS NULL OR m2.produit_id = conv.produit_id)
         ) AS non_lus
       FROM messages m
       JOIN (
         SELECT
           CASE WHEN from_id = ? THEN to_id ELSE from_id END AS autre_id,
+          produit_id,
           MAX(id) AS dernier_id
         FROM messages
         WHERE from_id = ? OR to_id = ?
-        GROUP BY autre_id
+        GROUP BY autre_id, produit_id
       ) conv ON m.id = conv.dernier_id
-      JOIN users autre ON autre.id = conv.autre_id
       JOIN users u ON u.id = conv.autre_id
       LEFT JOIN produits p ON p.id = m.produit_id
       ORDER BY m.created_at DESC
@@ -52,26 +55,53 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/messages/:userId — thread complet avec un utilisateur
+// GET /api/messages/:userId?produit_id=X — thread complet avec un utilisateur sur une annonce
 router.get('/:userId', async (req, res) => {
-  const moi   = req.user.id;
-  const autre = parseInt(req.params.userId);
+  const moi      = req.user.id;
+  const autre    = parseInt(req.params.userId);
+  const produitId = req.query.produit_id ? parseInt(req.query.produit_id) : null;
   try {
+    const baseWhere = '((m.from_id = ? AND m.to_id = ?) OR (m.from_id = ? AND m.to_id = ?))';
+    const params = [moi, autre, autre, moi];
+    const produitClause = produitId ? ' AND m.produit_id = ?' : ' AND m.produit_id IS NULL';
+    if (produitId) params.push(produitId);
+
     const [rows] = await db.query(`
       SELECT m.*, u.raison_sociale AS from_name, p.titre AS produit_titre
       FROM messages m
       JOIN users u ON u.id = m.from_id
       LEFT JOIN produits p ON p.id = m.produit_id
-      WHERE (m.from_id = ? AND m.to_id = ?) OR (m.from_id = ? AND m.to_id = ?)
+      WHERE ${baseWhere}${produitClause}
       ORDER BY m.created_at ASC
-    `, [moi, autre, autre, moi]);
+    `, params);
 
     // Marquer les messages reçus comme lus
+    const luParams = [autre, moi];
+    const luProduit = produitId ? ' AND produit_id = ?' : ' AND produit_id IS NULL';
+    if (produitId) luParams.push(produitId);
     await db.query(
-      'UPDATE messages SET lu = 1 WHERE from_id = ? AND to_id = ? AND lu = 0',
-      [autre, moi]
+      `UPDATE messages SET lu = 1 WHERE from_id = ? AND to_id = ? AND lu = 0${luProduit}`,
+      luParams
     );
 
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// GET /api/messages/produit/:produitId/acheteurs — utilisateurs ayant écrit sur ce produit
+router.get('/produit/:produitId/acheteurs', async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT DISTINCT u.id, u.raison_sociale
+       FROM messages m
+       JOIN users u ON u.id = m.from_id
+       JOIN produits p ON p.id = m.produit_id
+       WHERE m.produit_id = ? AND p.seller_id = ? AND m.from_id != ?`,
+      [req.params.produitId, req.user.id, req.user.id]
+    );
     res.json(rows);
   } catch (err) {
     console.error(err);

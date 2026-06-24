@@ -325,11 +325,12 @@
     <div id="thread-content" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
       <div class="thread-header">
         <button class="btn btn-ghost btn-sm" id="thread-header-back" style="display:none;" onclick="backToList()">←</button>
-        <div class="conv-avatar" id="thread-avatar"></div>
-        <div>
-          <div class="thread-header-name" id="thread-name"></div>
-          <div class="thread-header-product" id="thread-product"></div>
+        <a class="conv-avatar" id="thread-avatar" href="#" style="text-decoration:none;"></a>
+        <div style="flex:1;">
+          <a class="thread-header-name" id="thread-name" href="#" style="text-decoration:none;color:inherit;"></a>
+          <a class="thread-header-product" id="thread-product" href="#" style="text-decoration:none;"></a>
         </div>
+        <button class="btn btn-ghost btn-sm" id="btn-vendu-conv" style="display:none;flex-shrink:0;" onclick="marquerVenduConv()">✅ Marquer vendu</button>
       </div>
       <div class="thread-messages" id="thread-messages"></div>
       <div class="thread-compose">
@@ -390,7 +391,7 @@ function renderConversations(liste) {
     return '<div class="conv-item" onclick="ouvrirThread(' + autreId + ', \'' + escHtml(c.raison_sociale) + '\', ' + (c.produit_id || 'null') + ')">'
       + '<div class="conv-avatar">' + initiales + '</div>'
       + '<div class="conv-info">'
-      + (c.produit_titre ? '<div class="conv-product">📦 ' + escHtml(c.produit_titre) + '</div>' : '')
+      + (c.produit_titre ? '<div class="conv-product">📦 ' + escHtml(c.produit_titre) + (c.produit_vendu ? ' <span style="background:#1e293b;color:#f8fafc;font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;vertical-align:middle;">Vendu</span>' : '') + '</div>' : '')
       + '<div class="conv-name">' + escHtml(c.raison_sociale) + '</div>'
       + '<div class="conv-preview">' + escHtml(c.contenu.substring(0, 60)) + '</div>'
       + '</div>'
@@ -415,20 +416,40 @@ async function ouvrirThread(userId, nom, produitId) {
 
   document.getElementById('thread-empty').style.display   = 'none';
   document.getElementById('thread-content').style.display = 'flex';
+  document.getElementById('btn-vendu-conv').style.display = 'none';
+  var prodLink = document.getElementById('thread-product');
+  prodLink.textContent = '';
+  prodLink.removeAttribute('href');
 
-  // Si le nom est inconnu, le récupérer depuis le produit
-  if (!nom && produitId) {
+  // Charger le produit si présent
+  if (produitId) {
     try {
       var r = await fetch(API + '/produits/' + produitId, { credentials: 'include' });
       var p = await r.json();
-      nom = p.raison_sociale;
+      if (!nom) nom = p.raison_sociale;
+      // Lien vers l'annonce dans le header
+      var prodLink = document.getElementById('thread-product');
+      prodLink.textContent = '📦 ' + p.titre;
+      prodLink.href = 'product.html?id=' + produitId;
+      // Afficher le bouton "Marquer vendu" si on est le vendeur et l'annonce est active
+      if (moi && p.seller_id === moi.id && !p.vendu) {
+        var btn = document.getElementById('btn-vendu-conv');
+        btn.style.display = '';
+        btn.dataset.produitId  = produitId;
+        btn.dataset.acheteurId = userId;
+      }
     } catch {}
   }
 
   if (nom) {
     var initiales = nom.split(' ').slice(0, 2).map(function(w) { return w[0].toUpperCase(); }).join('');
-    document.getElementById('thread-avatar').textContent = initiales;
-    document.getElementById('thread-name').textContent   = nom;
+    var profilUrl = 'profil-vendeur.html?id=' + userId;
+    var avatarEl  = document.getElementById('thread-avatar');
+    var nameEl    = document.getElementById('thread-name');
+    avatarEl.textContent = initiales;
+    avatarEl.href        = profilUrl;
+    nameEl.textContent   = nom;
+    nameEl.href          = profilUrl;
   }
 
   await chargerMessages(userId, produitId);
@@ -439,7 +460,8 @@ async function chargerMessages(userId, produitId) {
   el.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:2rem;">Chargement…</div>';
 
   try {
-    var res  = await fetch(API + '/messages/' + userId, { credentials: 'include' });
+    var url = API + '/messages/' + userId + (produitId ? '?produit_id=' + produitId : '');
+    var res  = await fetch(url, { credentials: 'include' });
     var msgs = await res.json();
 
     if (!msgs.length) {
@@ -518,6 +540,39 @@ async function envoyer() {
     chargerConversations();
   } catch {
     alert('Erreur lors de l\'envoi.');
+  }
+}
+
+async function marquerVenduConv() {
+  var btn = document.getElementById('btn-vendu-conv');
+  var produitId  = btn.dataset.produitId;
+  var acheteurId = btn.dataset.acheteurId;
+  var nom = document.getElementById('thread-name').textContent;
+
+  if (!confirm('Marquer cette annonce comme vendue à ' + nom + ' ?')) return;
+
+  btn.disabled = true;
+  btn.textContent = '…';
+  try {
+    var res = await fetch(API + '/transactions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ produit_id: parseInt(produitId), acheteur_id: parseInt(acheteurId) }),
+    });
+    var data = await res.json();
+    if (res.ok) {
+      btn.textContent = '✅ Vendu';
+      btn.disabled = true;
+    } else {
+      alert(data.error || 'Erreur');
+      btn.disabled = false;
+      btn.textContent = '✅ Marquer vendu';
+    }
+  } catch {
+    alert('Erreur réseau.');
+    btn.disabled = false;
+    btn.textContent = '✅ Marquer vendu';
   }
 }
 

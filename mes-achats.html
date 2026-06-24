@@ -25,7 +25,63 @@
   padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 4vw, 2rem);
 }
 
-.coming-soon {
+.achat-card {
+  display: flex;
+  gap: 1.2rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.2rem;
+  margin-bottom: 1rem;
+  transition: box-shadow .15s;
+}
+.achat-card:hover { box-shadow: var(--shadow-md); }
+.achat-img {
+  width: 110px;
+  height: 90px;
+  border-radius: var(--radius);
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--bg);
+}
+.achat-img-placeholder {
+  width: 110px;
+  height: 90px;
+  border-radius: var(--radius);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.achat-info { flex: 1; min-width: 0; }
+.achat-titre {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  color: var(--text);
+  margin-bottom: 0.3rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.achat-meta { font-size: 13px; color: var(--muted); margin-bottom: 0.5rem; }
+.achat-meta span { margin-right: 1rem; }
+.achat-prix { font-size: 1rem; font-weight: 600; color: var(--green); }
+.achat-vendeur { font-size: 13px; color: var(--muted); margin-top: 0.4rem; }
+.achat-vendeur a { color: var(--green); text-decoration: none; }
+.achat-vendeur a:hover { text-decoration: underline; }
+.achat-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+.empty-state {
   text-align: center;
   padding: 5rem 2rem;
   color: var(--muted);
@@ -33,14 +89,9 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
 }
-.coming-soon-icon { font-size: 3rem; margin-bottom: 1.2rem; }
-.coming-soon-title {
-  font-family: var(--font-serif);
-  font-size: 1.4rem;
-  color: var(--text);
-  margin-bottom: 0.6rem;
-}
-.coming-soon-text { font-size: 14px; line-height: 1.7; max-width: 400px; margin: 0 auto 2rem; }
+.empty-icon { font-size: 3rem; margin-bottom: 1.2rem; }
+.empty-title { font-family: var(--font-serif); font-size: 1.4rem; color: var(--text); margin-bottom: 0.6rem; }
+.empty-text { font-size: 14px; line-height: 1.7; max-width: 400px; margin: 0 auto 2rem; }
 </style>
 </head>
 <body>
@@ -96,25 +147,72 @@
 </div>
 
 <div class="achats-body">
-  <div class="coming-soon">
-    <div class="coming-soon-icon">🛒</div>
-    <div class="coming-soon-title">Fonctionnalité à venir</div>
-    <div class="coming-soon-text">
-      Le suivi des achats sera disponible prochainement. Vous pourrez retrouver ici l'historique de vos transactions, vos factures et le statut de vos commandes.
-    </div>
-    <a href="marketplace.html" class="btn btn-primary">Parcourir le catalogue</a>
-  </div>
+  <div id="loading-achats" style="text-align:center;padding:3rem;color:var(--muted);font-size:14px;">Chargement…</div>
+  <div id="liste-achats"></div>
 </div>
 
 <script src="auth-guard.js"></script>
 <script>
 (async function() {
-  const user = await requireAuth();
+  var user = await requireAuth();
   await initNav(user);
+  await chargerAchats();
 })();
 
 function toggleMobileNav() {
   document.getElementById('mobile-nav').classList.toggle('open');
+}
+
+async function chargerAchats() {
+  var loading = document.getElementById('loading-achats');
+  var liste = document.getElementById('liste-achats');
+  try {
+    var res = await fetch(API + '/transactions/achats', { credentials: 'include' });
+    var achats = await res.json();
+    loading.style.display = 'none';
+
+    if (!achats.length) {
+      liste.innerHTML = '<div class="empty-state"><div class="empty-icon">🛒</div><div class="empty-title">Aucun achat pour le moment</div><div class="empty-text">Vous n\'avez pas encore effectué d\'achat. Parcourez le catalogue pour trouver votre bonheur.</div><a href="marketplace.html" class="btn btn-primary">Parcourir le catalogue</a></div>';
+      return;
+    }
+
+    liste.innerHTML = achats.map(function(a) {
+      var images = [];
+      try { images = JSON.parse(a.images) || []; } catch(e) {}
+      var imgHtml = images[0]
+        ? '<img class="achat-img" src="/uploads/' + escHtml(images[0]) + '" alt="">'
+        : '<div class="achat-img-placeholder">📦</div>';
+
+      var date = new Date(a.achat_date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+      var prix = parseFloat(a.prix_ht).toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' € HT';
+
+      return '<div class="achat-card">' +
+        '<a href="product.html?id=' + a.id + '">' + imgHtml + '</a>' +
+        '<div class="achat-info">' +
+          '<div class="achat-titre">' + escHtml(a.titre) + '</div>' +
+          '<div class="achat-meta">' +
+            '<span>' + escHtml(a.categorie) + '</span>' +
+            '<span>' + escHtml(a.etat) + '</span>' +
+            '<span>Acheté le ' + date + '</span>' +
+          '</div>' +
+          '<div class="achat-prix">' + prix + '</div>' +
+          '<div class="achat-vendeur">Vendu par <a href="profil-vendeur.html?id=' + a.vendeur_id + '">' + escHtml(a.vendeur_nom) + '</a></div>' +
+        '</div>' +
+        '<div class="achat-actions">' +
+          '<a href="product.html?id=' + a.id + '" class="btn btn-ghost btn-sm">Voir l\'annonce</a>' +
+          '<a href="messages.html?user=' + a.vendeur_id + '" class="btn btn-ghost btn-sm">Contacter</a>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } catch(err) {
+    console.error('chargerAchats:', err);
+    loading.textContent = 'Erreur lors du chargement.';
+  }
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 </script>
 </body>

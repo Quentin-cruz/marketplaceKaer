@@ -285,7 +285,7 @@ async function chargerVendeur() {
 
     _vendeurId = data.id;
     await chargerAvis(data.id);
-    if (_moi && _moi.id !== data.id) afficherFormulaireAvis(data.id);
+    if (_moi && _moi.id !== data.id) await verifierEtAfficherFormulaireAvis(data.id);
 
     grid.className = 'vendeur-grid';
     grid.innerHTML = data.annonces.map(function(p) {
@@ -353,10 +353,32 @@ async function chargerAvis(vendeurId) {
   } catch { /* silencieux */ }
 }
 
-function afficherFormulaireAvis(vendeurId) {
+async function verifierEtAfficherFormulaireAvis(vendeurId) {
+  try {
+    var res  = await fetch(API + '/transactions/avec/' + vendeurId, { credentials: 'include' });
+    var data = await res.json();
+    if (data.transactionExiste) {
+      // monRole = 'acheteur' → j'ai acheté → j'évalue un vendeur
+      // monRole = 'vendeur'  → j'ai vendu  → j'évalue un acheteur
+      var contexte = data.monRole === 'acheteur'
+        ? { titre: 'Évaluer ce vendeur', placeholder: 'Décrivez votre expérience d\'achat : sérieux, qualité des produits, réactivité…' }
+        : { titre: 'Évaluer cet acheteur', placeholder: 'Décrivez votre expérience : sérieux, communication, respect des engagements…' };
+      afficherFormulaireAvis(vendeurId, contexte);
+    } else {
+      document.getElementById('avis-form-wrap').innerHTML =
+        '<div style="font-size:13px;color:var(--muted);padding:0.8rem 1rem;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);">'
+        + 'Vous devez avoir effectué une transaction avec cette personne pour laisser un avis.'
+        + '</div>';
+    }
+  } catch { /* silencieux */ }
+}
+
+function afficherFormulaireAvis(vendeurId, contexte) {
+  var titre       = contexte ? contexte.titre       : 'Laisser un avis';
+  var placeholder = contexte ? contexte.placeholder : 'Partagez votre expérience…';
   var wrap = document.getElementById('avis-form-wrap');
   wrap.innerHTML = '<div class="avis-form">'
-    + '<div class="avis-form-title">Laisser un avis</div>'
+    + '<div class="avis-form-title">' + titre + '</div>'
     + '<div class="star-picker" id="star-picker">'
     + '<span onclick="setNote(1)" onmouseover="hoverNote(1)" onmouseout="resetHover()">★</span>'
     + '<span onclick="setNote(2)" onmouseover="hoverNote(2)" onmouseout="resetHover()">★</span>'
@@ -365,7 +387,7 @@ function afficherFormulaireAvis(vendeurId) {
     + '<span onclick="setNote(5)" onmouseover="hoverNote(5)" onmouseout="resetHover()">★</span>'
     + '</div>'
     + '<div class="form-group">'
-    + '<textarea id="avis-commentaire" placeholder="Partagez votre expérience avec ce vendeur…" style="min-height:80px;"></textarea>'
+    + '<textarea id="avis-commentaire" placeholder="' + placeholder + '" style="min-height:80px;"></textarea>'
     + '</div>'
     + '<div id="avis-error" class="form-error" style="display:none;margin-bottom:0.8rem;"></div>'
     + '<button class="btn btn-primary btn-sm" onclick="envoyerAvis(' + vendeurId + ')">Publier l\'avis</button>'

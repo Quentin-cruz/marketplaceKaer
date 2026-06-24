@@ -32,7 +32,8 @@ app.use('/api/produits', require('./routes/produits'));
 app.use('/api/messages', require('./routes/messages'));
 app.use('/api/users',   require('./routes/users'));
 app.use('/api/avis',    require('./routes/avis'));
-app.use('/api/favoris', require('./routes/favoris'));
+app.use('/api/favoris',       require('./routes/favoris'));
+app.use('/api/transactions',  require('./routes/transactions'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 

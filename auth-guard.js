@@ -38,6 +38,28 @@ async function initNav(user) {
     const wrap = document.querySelector('.avatar-wrap');
     if (wrap && !wrap.contains(e.target)) closeDropdown();
   });
+
+  // Recherche navbar
+  var searchInput = document.querySelector('.navbar-search input[type="search"]');
+  if (searchInput) {
+    // Pré-remplir si on arrive depuis une recherche
+    var qParam = new URLSearchParams(window.location.search).get('q');
+    if (qParam) searchInput.value = qParam;
+
+    searchInput.addEventListener('keydown', function(e) {
+      if (e.key !== 'Enter') return;
+      var q = searchInput.value.trim();
+      if (!q) return;
+      var isMarketplace = window.location.pathname.endsWith('marketplace.html') || window.location.pathname === '/';
+      if (isMarketplace && typeof loadProduits === 'function') {
+        // Déjà sur le catalogue — on injecte dans les filtres actifs
+        activeFilters.q = q;
+        loadProduits();
+      } else {
+        window.location.href = '/marketplace.html?q=' + encodeURIComponent(q);
+      }
+    });
+  }
 }
 
 function toggleDropdown() {

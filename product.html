@@ -493,7 +493,7 @@
       <div class="info-tabs">
         <button class="info-tab active" onclick="switchInfo('desc', this)">Description</button>
         <button class="info-tab" onclick="switchInfo('specs', this)">Caractéristiques</button>
-        <button class="info-tab" onclick="switchInfo('reviews', this)">Avis (14)</button>
+        <button class="info-tab" id="tab-reviews" onclick="switchInfo('reviews', this)">Avis</button>
       </div>
 
       <div class="info-panel active" id="info-desc">
@@ -507,37 +507,8 @@
       </div>
 
       <div class="info-panel" id="info-reviews">
-        <div class="review-summary">
-          <div>
-            <div class="review-big-score">4,7</div>
-            <div class="review-stars">★★★★★</div>
-            <div class="review-count">14 avis vérifiés</div>
-          </div>
-          <div class="review-bars">
-            <div class="review-bar-row">5 ★ <div class="review-bar-track"><div class="review-bar-fill" style="width:72%"></div></div> 10</div>
-            <div class="review-bar-row">4 ★ <div class="review-bar-track"><div class="review-bar-fill" style="width:21%"></div></div> 3</div>
-            <div class="review-bar-row">3 ★ <div class="review-bar-track"><div class="review-bar-fill" style="width:7%"></div></div> 1</div>
-            <div class="review-bar-row">2 ★ <div class="review-bar-track"><div class="review-bar-fill" style="width:0%"></div></div> 0</div>
-            <div class="review-bar-row">1 ★ <div class="review-bar-track"><div class="review-bar-fill" style="width:0%"></div></div> 0</div>
-          </div>
-        </div>
-
-        <div class="review-item">
-          <div class="review-header">
-            <div class="stars">★★★★★</div>
-            <span class="reviewer-name">Centre Équestre du Marais</span>
-            <span class="review-date">14 mars 2026</span>
-          </div>
-          <p class="review-text">Qualité irréprochable. Nous avons commandé 3 selles pour notre école, parfaites pour l'enseignement. Le cuir est souple dès la réception, vraiment excellent rapport qualité/prix.</p>
-        </div>
-
-        <div class="review-item">
-          <div class="review-header">
-            <div class="stars">★★★★☆</div>
-            <span class="reviewer-name">Haras de Gascogne</span>
-            <span class="review-date">2 février 2026</span>
-          </div>
-          <p class="review-text">Bonne selle, conforme à la description. Délai de livraison légèrement plus long que prévu (12 jours), mais le produit vaut le détour.</p>
+        <div id="reviews-content">
+          <div style="text-align:center;padding:2rem;color:var(--muted);font-size:13px;">Chargement des avis…</div>
         </div>
       </div>
     </div>
@@ -660,7 +631,11 @@ async function loadProduit() {
     var badge  = document.getElementById('gallery-badge');
     var labels = { neuf: 'Neuf', occasion: 'Occasion', reconditionne: 'Reconditionné' };
     var classes = { neuf: 'badge-green', occasion: 'badge-gray', reconditionne: 'badge-brown' };
-    badge.innerHTML = '<span class="badge ' + (classes[p.etat] || 'badge-gray') + '">' + (labels[p.etat] || p.etat) + ' · En ligne</span>';
+    if (p.vendu) {
+      badge.innerHTML = '<span class="badge badge-vendu">Vendu</span>';
+    } else {
+      badge.innerHTML = '<span class="badge ' + (classes[p.etat] || 'badge-gray') + '">' + (labels[p.etat] || p.etat) + ' · En ligne</span>';
+    }
 
     // Galerie photos
     var imgs   = p.images ? JSON.parse(p.images) : [];
@@ -695,11 +670,20 @@ async function loadProduit() {
 
     // Boutons propriétaire vs visiteur
     if (window._moi && window._moi.id === p.seller_id) {
-      document.getElementById('btn-contact').style.display  = 'none';
-      document.getElementById('ask-block').style.display    = 'none';
+      document.getElementById('btn-contact').style.display        = 'none';
+      document.getElementById('btn-fav').style.display            = 'none';
+      document.getElementById('btn-seller-contact').style.display = 'none';
+      document.getElementById('ask-block').style.display          = 'none';
       var btnModifier = document.getElementById('btn-modifier');
       btnModifier.style.display = '';
       btnModifier.href = 'publier.html?edit=' + p.id;
+    } else if (p.vendu) {
+      document.getElementById('btn-contact').style.display        = 'none';
+      document.getElementById('btn-fav').style.display            = 'none';
+      document.getElementById('btn-seller-contact').style.display = 'none';
+      document.getElementById('ask-block').style.display          = 'none';
+      var stockInfo = document.querySelector('.stock-info');
+      if (stockInfo) stockInfo.innerHTML = '<span style="color:var(--muted);">⛔ Article vendu</span>';
     }
 
     // Caractéristiques
@@ -714,6 +698,9 @@ async function loadProduit() {
 
     // Titre de la page
     document.title = p.titre + ' — Kaer Seller';
+
+    // Avis vendeur
+    chargerAvis(p.seller_id);
 
   } catch (err) {
     showErreur('Erreur lors du chargement du produit.');
@@ -812,6 +799,66 @@ async function toggleFavori() {
     var data = await res.json();
     btn.textContent = data.favori ? '❤️' : '🤍';
   } catch(e) {}
+}
+
+async function chargerAvis(vendeurId) {
+  var container = document.getElementById('reviews-content');
+  try {
+    var res  = await fetch(API + '/avis/' + vendeurId, { credentials: 'include' });
+    var data = await res.json();
+
+    // Mettre à jour le label de l'onglet
+    document.getElementById('tab-reviews').textContent = 'Avis' + (data.total > 0 ? ' (' + data.total + ')' : '');
+
+    if (!data.total) {
+      container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:13px;">Aucun avis pour ce vendeur.</div>';
+      return;
+    }
+
+    var moy = parseFloat(data.moyenne);
+    var moyStr = moy.toFixed(1).replace('.', ',');
+    var etoiles = function(n) {
+      var s = '';
+      for (var i = 1; i <= 5; i++) s += i <= Math.round(n) ? '★' : '☆';
+      return s;
+    };
+
+    // Calcul distribution
+    var dist = [0, 0, 0, 0, 0];
+    data.avis.forEach(function(a) { dist[a.note - 1]++; });
+
+    var barsHtml = [5,4,3,2,1].map(function(n) {
+      var count = dist[n - 1];
+      var pct   = data.total ? Math.round(count / data.total * 100) : 0;
+      return '<div class="review-bar-row">' + n + ' ★'
+        + '<div class="review-bar-track"><div class="review-bar-fill" style="width:' + pct + '%"></div></div>'
+        + count + '</div>';
+    }).join('');
+
+    var summaryHtml = '<div class="review-summary">'
+      + '<div><div class="review-big-score">' + moyStr + '</div>'
+      + '<div class="review-stars">' + etoiles(moy) + '</div>'
+      + '<div class="review-count">' + data.total + ' avis</div></div>'
+      + '<div class="review-bars">' + barsHtml + '</div>'
+      + '</div>';
+
+    var itemsHtml = data.avis.map(function(a) {
+      var date = new Date(a.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+      return '<div class="review-item">'
+        + '<div class="review-header">'
+        + '<div class="stars">' + etoiles(a.note) + '</div>'
+        + '<span class="reviewer-name">' + escHtml(a.auteur_nom) + '</span>'
+        + '<span class="review-date">' + date + '</span>'
+        + '</div>'
+        + (a.commentaire ? '<p class="review-text">' + escHtml(a.commentaire) + '</p>' : '')
+        + '</div>';
+    }).join('');
+
+    container.innerHTML = summaryHtml + itemsHtml;
+  } catch(err) {
+    console.error('chargerAvis:', err);
+    container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:13px;">Impossible de charger les avis.</div>';
+  }
 }
 
 function escHtml(str) {

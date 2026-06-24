@@ -5,10 +5,13 @@ const upload      = require('../upload');
 
 // GET /api/produits — liste avec filtres
 router.get('/', async (req, res) => {
-  const { categorie, etat, region, q, sort } = req.query;
+  const { categorie, etat, region, q, sort, statut } = req.query;
 
   let sql    = 'SELECT p.*, u.raison_sociale FROM produits p JOIN users u ON p.seller_id = u.id WHERE 1=1';
   const params = [];
+
+  if (statut === 'vendu')  { sql += ' AND p.vendu = 1'; }
+  else                     { sql += ' AND p.vendu = 0'; }
 
   if (categorie) { sql += ' AND p.categorie = ?';         params.push(categorie); }
   if (etat)      { sql += ' AND p.etat = ?';              params.push(etat); }
@@ -31,11 +34,29 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /api/produits/count — nombre d'annonces en ligne (non vendues)
+router.get('/count', async (req, res) => {
+  try {
+    const [[row]] = await db.query('SELECT COUNT(*) AS total FROM produits WHERE vendu = 0');
+    res.json({ total: row.total });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 // GET /api/produits/moi — annonces de l'utilisateur connecté
 router.get('/moi', requireAuth, async (req, res) => {
   try {
     const [rows] = await db.query(
-      'SELECT * FROM produits WHERE seller_id = ? ORDER BY created_at DESC',
+      `SELECT p.*,
+              t.acheteur_id,
+              u.raison_sociale AS acheteur_nom
+       FROM produits p
+       LEFT JOIN transactions t ON t.produit_id = p.id
+       LEFT JOIN users u ON u.id = t.acheteur_id
+       WHERE p.seller_id = ?
+       ORDER BY p.created_at DESC`,
       [req.user.id]
     );
     res.json(rows);

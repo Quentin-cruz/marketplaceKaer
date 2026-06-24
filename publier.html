@@ -288,7 +288,7 @@ textarea {
 
   <!-- PHOTOS -->
   <div class="form-section">
-    <div class="form-section-title">Photos <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optionnel — max 5)</span></div>
+    <div class="form-section-title">Photos <span style="font-weight:400;text-transform:none;letter-spacing:0;">(1 minimum · max 5)</span></div>
     <div class="upload-zone" id="upload-zone">
       <input type="file" id="f-images" accept="image/jpeg,image/png,image/webp" multiple>
       <div class="upload-zone-icon">📷</div>
@@ -354,6 +354,9 @@ var selectedFiles = [];
   document.getElementById('f-categorie').addEventListener('change', function() {
     renderCaracFields(this.value, null);
   });
+
+  // Pré-remplir la région depuis le profil (si pas en mode édition)
+  if (user.region) document.getElementById('f-region').value = user.region;
 
   var editId = new URLSearchParams(window.location.search).get('edit');
   if (editId) {
@@ -554,8 +557,13 @@ async function publier() {
   var etat        = document.querySelector('input[name="etat"]:checked').value;
   var prixRaw     = document.getElementById('f-prix').value;
 
-  if (!titre)     return showError('Veuillez saisir un titre.');
-  if (!categorie) return showError('Veuillez choisir une catégorie.');
+  var totalPhotos = (window._existingImages || []).length + selectedFiles.length;
+
+  if (!titre)       return showError('Veuillez saisir un titre.');
+  if (!categorie)   return showError('Veuillez choisir une catégorie.');
+  if (!region)      return showError('Veuillez choisir une localisation.');
+  if (!description) return showError('Veuillez saisir une description.');
+  if (totalPhotos === 0) return showError('Veuillez ajouter au moins une photo.');
 
   var btn = document.getElementById('btn-publier');
   btn.disabled = true;

@@ -38,6 +38,15 @@ router.post('/:vendeurId', requireAuth, async (req, res) => {
     return res.status(400).json({ error: 'Note invalide (1 à 5)' });
 
   try {
+    // Vérifier qu'une transaction validée existe entre les deux parties (dans un sens ou l'autre)
+    const [[tx]] = await db.query(
+      `SELECT id FROM transactions
+       WHERE (acheteur_id = ? AND vendeur_id = ?) OR (vendeur_id = ? AND acheteur_id = ?)
+       LIMIT 1`,
+      [auteurId, vendeurId, auteurId, vendeurId]
+    );
+    if (!tx) return res.status(403).json({ error: 'Vous devez avoir effectué une transaction avec cette personne pour laisser un avis.' });
+
     await db.query(
       'INSERT INTO avis (vendeur_id, auteur_id, note, commentaire) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE note = VALUES(note), commentaire = VALUES(commentaire)',
       [vendeurId, auteurId, note, commentaire || null]
