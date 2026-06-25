@@ -277,15 +277,15 @@ async function chargerVendeur() {
     meta.push('Membre depuis ' + new Date(data.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }));
     document.getElementById('hero-meta').textContent = meta.join(' · ');
 
+    _vendeurId = data.id;
+    await chargerAvis(data.id);
+    if (_moi && _moi.id !== data.id) await verifierEtAfficherFormulaireAvis(data.id);
+
     var grid = document.getElementById('vendeur-grid');
     if (!data.annonces.length) {
       grid.innerHTML = '<div class="empty-state">Aucune annonce publiée pour l\'instant.</div>';
       return;
     }
-
-    _vendeurId = data.id;
-    await chargerAvis(data.id);
-    if (_moi && _moi.id !== data.id) await verifierEtAfficherFormulaireAvis(data.id);
 
     grid.className = 'vendeur-grid';
     grid.innerHTML = data.annonces.map(function(p) {
