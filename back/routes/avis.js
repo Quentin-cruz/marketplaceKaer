@@ -6,7 +6,7 @@ const requireAuth = require('../middleware/auth');
 router.get('/:vendeurId', async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT a.id, a.note, a.commentaire, a.created_at,
+      `SELECT a.id, a.auteur_id, a.note, a.commentaire, a.created_at,
               u.raison_sociale AS auteur_nom
        FROM avis a
        JOIN users u ON a.auteur_id = u.id
@@ -47,9 +47,26 @@ router.post('/:vendeurId', requireAuth, async (req, res) => {
     );
     if (!tx) return res.status(403).json({ error: 'Vous devez avoir effectué une transaction avec cette personne pour laisser un avis.' });
 
+    const { transaction_id } = req.body;
+    if (!transaction_id) return res.status(400).json({ error: 'transaction_id requis' });
+
+    // Vérifier que la transaction appartient bien à l'auteur et concerne ce vendeur
+    const [[txCheck]] = await db.query(
+      `SELECT id FROM transactions
+       WHERE id = ? AND ((acheteur_id = ? AND vendeur_id = ?) OR (vendeur_id = ? AND acheteur_id = ?))`,
+      [transaction_id, auteurId, vendeurId, auteurId, vendeurId]
+    );
+    if (!txCheck) return res.status(403).json({ error: 'Transaction invalide.' });
+
+    const [[existant]] = await db.query(
+      'SELECT id FROM avis WHERE transaction_id = ?',
+      [transaction_id]
+    );
+    if (existant) return res.status(409).json({ error: 'Un avis a déjà été posté pour cette transaction.' });
+
     await db.query(
-      'INSERT INTO avis (vendeur_id, auteur_id, note, commentaire) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE note = VALUES(note), commentaire = VALUES(commentaire)',
-      [vendeurId, auteurId, note, commentaire || null]
+      'INSERT INTO avis (vendeur_id, auteur_id, transaction_id, note, commentaire) VALUES (?, ?, ?, ?, ?)',
+      [vendeurId, auteurId, transaction_id, note, commentaire || null]
     );
     res.status(201).json({ message: 'Avis enregistré' });
   } catch (err) {

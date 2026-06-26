@@ -23,22 +23,26 @@ router.get('/achats', requireAuth, async (req, res) => {
   }
 });
 
-// GET /api/transactions/avec/:userId — vérifie si une transaction existe entre moi et cet utilisateur
+// GET /api/transactions/avec/:userId — liste des transactions entre moi et cet utilisateur, avec flag avis déjà posté
 router.get('/avec/:userId', requireAuth, async (req, res) => {
   const moi   = req.user.id;
   const autre = parseInt(req.params.userId);
   try {
-    const [[row]] = await db.query(
-      `SELECT id,
-              CASE WHEN acheteur_id = ? THEN 'acheteur' ELSE 'vendeur' END AS mon_role
-       FROM transactions
-       WHERE (acheteur_id = ? AND vendeur_id = ?) OR (vendeur_id = ? AND acheteur_id = ?)
-       LIMIT 1`,
+    const [rows] = await db.query(
+      `SELECT t.id, t.created_at,
+              p.titre AS produit_titre,
+              CASE WHEN t.acheteur_id = ? THEN 'acheteur' ELSE 'vendeur' END AS mon_role,
+              (SELECT id FROM avis WHERE transaction_id = t.id LIMIT 1) AS avis_id
+       FROM transactions t
+       JOIN produits p ON p.id = t.produit_id
+       WHERE (t.acheteur_id = ? AND t.vendeur_id = ?) OR (t.vendeur_id = ? AND t.acheteur_id = ?)
+       ORDER BY t.created_at DESC`,
       [moi, moi, autre, moi, autre]
     );
     res.json({
-      transactionExiste: !!row,
-      monRole: row ? row.mon_role : null,
+      transactionExiste: rows.length > 0,
+      monRole: rows.length > 0 ? rows[0].mon_role : null,
+      transactions: rows,
     });
   } catch (err) {
     console.error(err);

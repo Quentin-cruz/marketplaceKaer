@@ -238,6 +238,7 @@
 var _moi = null;
 var _vendeurId = null;
 var _noteSelectionnee = 0;
+var _avisData = null;
 
 (async function() {
   var user = await requireAuth();
@@ -334,6 +335,7 @@ async function chargerAvis(vendeurId) {
         + '</div>';
     }
 
+    _avisData = data;
     var list = document.getElementById('avis-list');
     if (!data.avis.length) {
       list.innerHTML = '<div style="font-size:13px;color:var(--muted);margin-bottom:1rem;">Aucun avis pour l\'instant.</div>';
@@ -357,28 +359,42 @@ async function verifierEtAfficherFormulaireAvis(vendeurId) {
   try {
     var res  = await fetch(API + '/transactions/avec/' + vendeurId, { credentials: 'include' });
     var data = await res.json();
-    if (data.transactionExiste) {
-      // monRole = 'acheteur' → j'ai acheté → j'évalue un vendeur
-      // monRole = 'vendeur'  → j'ai vendu  → j'évalue un acheteur
-      var contexte = data.monRole === 'acheteur'
-        ? { titre: 'Évaluer ce vendeur', placeholder: 'Décrivez votre expérience d\'achat : sérieux, qualité des produits, réactivité…' }
-        : { titre: 'Évaluer cet acheteur', placeholder: 'Décrivez votre expérience : sérieux, communication, respect des engagements…' };
-      afficherFormulaireAvis(vendeurId, contexte);
-    } else {
+    if (!data.transactionExiste) {
       document.getElementById('avis-form-wrap').innerHTML =
         '<div style="font-size:13px;color:var(--muted);padding:0.8rem 1rem;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);">'
         + 'Vous devez avoir effectué une transaction avec cette personne pour laisser un avis.'
         + '</div>';
+      return;
     }
+    var enAttente = data.transactions.filter(function(t) { return !t.avis_id; });
+    if (!enAttente.length) {
+      document.getElementById('avis-form-wrap').innerHTML =
+        '<div style="font-size:13px;color:var(--muted);padding:0.8rem 1rem;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);">Vous avez déjà laissé un avis pour chacune de vos transactions avec cette personne.</div>';
+      return;
+    }
+    var contexte = data.monRole === 'acheteur'
+      ? { titre: 'Évaluer ce vendeur', placeholder: 'Décrivez votre expérience d\'achat : sérieux, qualité des produits, réactivité…' }
+      : { titre: 'Évaluer cet acheteur', placeholder: 'Décrivez votre expérience : sérieux, communication, respect des engagements…' };
+    afficherFormulaireAvis(vendeurId, contexte, enAttente);
   } catch { /* silencieux */ }
 }
 
-function afficherFormulaireAvis(vendeurId, contexte) {
+function afficherFormulaireAvis(vendeurId, contexte, enAttente) {
   var titre       = contexte ? contexte.titre       : 'Laisser un avis';
   var placeholder = contexte ? contexte.placeholder : 'Partagez votre expérience…';
+  var selectHtml = '';
+  if (enAttente.length > 1) {
+    selectHtml = '<div class="form-group"><select id="avis-transaction" style="margin-bottom:0.8rem;">'
+      + enAttente.map(function(t) {
+          var date = new Date(t.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+          return '<option value="' + t.id + '">' + escHtml(t.produit_titre) + ' — ' + date + '</option>';
+        }).join('')
+      + '</select></div>';
+  }
   var wrap = document.getElementById('avis-form-wrap');
   wrap.innerHTML = '<div class="avis-form">'
     + '<div class="avis-form-title">' + titre + '</div>'
+    + selectHtml
     + '<div class="star-picker" id="star-picker">'
     + '<span onclick="setNote(1)" onmouseover="hoverNote(1)" onmouseout="resetHover()">★</span>'
     + '<span onclick="setNote(2)" onmouseover="hoverNote(2)" onmouseout="resetHover()">★</span>'
@@ -390,7 +406,7 @@ function afficherFormulaireAvis(vendeurId, contexte) {
     + '<textarea id="avis-commentaire" placeholder="' + placeholder + '" style="min-height:80px;"></textarea>'
     + '</div>'
     + '<div id="avis-error" class="form-error" style="display:none;margin-bottom:0.8rem;"></div>'
-    + '<button class="btn btn-primary btn-sm" onclick="envoyerAvis(' + vendeurId + ')">Publier l\'avis</button>'
+    + '<button class="btn btn-primary btn-sm" onclick="envoyerAvis(' + vendeurId + ',' + enAttente[0].id + ')">Publier l\'avis</button>'
     + '</div>';
 }
 
@@ -409,7 +425,7 @@ function setNote(n) {
   resetHover();
 }
 
-async function envoyerAvis(vendeurId) {
+async function envoyerAvis(vendeurId, defaultTransactionId) {
   var errEl = document.getElementById('avis-error');
   errEl.style.display = 'none';
 
@@ -418,6 +434,8 @@ async function envoyerAvis(vendeurId) {
     errEl.style.display = 'block';
     return;
   }
+  var selectEl = document.getElementById('avis-transaction');
+  var transaction_id = selectEl ? parseInt(selectEl.value) : defaultTransactionId;
   var commentaire = document.getElementById('avis-commentaire').value.trim();
 
   try {
@@ -425,7 +443,7 @@ async function envoyerAvis(vendeurId) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ note: _noteSelectionnee, commentaire }),
+      body: JSON.stringify({ note: _noteSelectionnee, commentaire, transaction_id }),
     });
     var data = await res.json();
     if (!res.ok) {
